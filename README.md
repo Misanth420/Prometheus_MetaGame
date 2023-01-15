@@ -4,7 +4,7 @@ This repository was made with the MetaGame DAO discord server in mind specifical
 
 Credits for helping me learn how to create a bot:
 
-https://github.com/richardschwabe 's youtube tutorial series: https://www.youtube.com/playlist?list=PLESMQx4LeD3N0-KKPPDaToZhBsom2E_Ju
+https://github.com/richardschwabe 's [youtube tutorial series](https://www.youtube.com/playlist?list=PLESMQx4LeD3N0-KKPPDaToZhBsom2E_Ju)
 
 Also, thanks @Polimyl for suggesting me to go with python instead of javascript. 
 
