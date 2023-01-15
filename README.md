@@ -6,7 +6,7 @@ Credits for helping me learn how to create a bot:
 
 https://github.com/richardschwabe 's youtube tutorial series: https://www.youtube.com/playlist?list=PLESMQx4LeD3N0-KKPPDaToZhBsom2E_Ju
 
-Also, thanks @Polymil for suggesting me to go with python instead of javascript. 
+Also, thanks @Polimyl for suggesting me to go with python instead of javascript. 
 
 # Description
 This is a discord.py 2 bot that allows any user with the specified role to create a voting poll and timeout any user(except server owner). Based on the results, the bot will either timeout the tagged user for the specified duration or return the appropriate error, depending on its origin(Vote count, Permissions, ..)
