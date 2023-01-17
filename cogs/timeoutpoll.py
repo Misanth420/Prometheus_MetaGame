@@ -3,6 +3,7 @@ from discord.ext import commands
 import datetime
 import asyncio
 import re
+import settings
 
 class AdminPollCog(commands.Cog):
     def __init__(self, bot):
@@ -13,7 +14,7 @@ class AdminPollCog(commands.Cog):
     async def timeoutpoll(self, ctx, poll_duration: int, offender: discord.Member, emoji_count: int, timeout_time, *, description: str):
 
         # Argument checks
-        role = discord.utils.get(ctx.guild.roles, name="Player") # temporarily defined here until expanded; string should match the role req. for invokation.
+        role = discord.utils.get(ctx.guild.roles, name=settings.DISCORD_ADMINCOG_REQ_ROLE) # temporarily defined here until expanded; string should match the role req. for invokation.
         if role not in ctx.author.roles:
             await ctx.send(f"Sorry, level up to {role} in order to cast Ice Nova ")
             return        

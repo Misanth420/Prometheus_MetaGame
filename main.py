@@ -18,6 +18,12 @@ def run():
         for cog_file in settings.COGS_DIR.glob("*.py"):
             if cog_file.name != "__init__.py":
                 await bot.load_extension(f"cogs.{cog_file.name[:-3]}")
+                print(f"Extension loaded: {f'cogs.{cog_file.name[:-3]}'}")
+        
+        for cmd_file in settings.CMDS_DIR.glob("*.py"):
+            if cmd_file.name != "__init__.py":                
+                await bot.load_extension(f"cmds.{cmd_file.name[:-3]}")
+                print(f"Command loaded: {f'cmds.{cmd_file.name[:-3]}'}")
         await bot.tree.sync()
         
     @bot.command()
@@ -31,6 +37,10 @@ def run():
     @bot.command()
     async def reload(ctx, cog: str):
         await bot.reload_extension(f"cogs.{cog.lower()}")
+
+    @bot.command()
+    async def reloadcmd(ctx, cmd: str):
+        await bot.reload_extension(f"cogs.{cmd.lower()}")
 
         
     bot.run(settings.DISCORD_API_SECRET, root_logger=True)

@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DISCORD_API_SECRET = os.getenv("DISCORD_API_TOKEN")
+DISCORD_ADMINCOG_REQ_ROLE = os.getenv("DISCORD_TIMEOUTPOLL_REQUIRED_ROLE")
 
 BASE_DIR = pathlib.Path(__file__).parent
 
