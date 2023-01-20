@@ -4,16 +4,24 @@ import logging
 from logging.config import dictConfig
 from dotenv import load_dotenv
 
+
+
+
 load_dotenv()
 
 DISCORD_API_SECRET = os.getenv("DISCORD_API_TOKEN")
-DISCORD_ADMINCOG_REQ_ROLE = os.getenv("DISCORD_TIMEOUTPOLL_REQUIRED_ROLE")
+D_GUILD_ID = os.getenv("GUILD_ID")
+D_REPORT_CHAN_ID = os.getenv("REPORT_CHANNEL_ID")
+D_REP_MENU_BUILD_ROLE = os.getenv("DISCORD_CALL_REPORTMENU_REQUIRED_ROLE")
+D_TIMEOUT_USE_ROLE = os.getenv("DISCORD_TIMEOUT_POLL_REQUIRED_ROLE")
+
+
 
 BASE_DIR = pathlib.Path(__file__).parent
 
+
 CMDS_DIR = BASE_DIR / "cmds"
 COGS_DIR = BASE_DIR / "cogs"
-
 
 
 LOGGING_CONFIG = {

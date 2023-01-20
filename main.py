@@ -44,14 +44,17 @@ def run():
     @bot.command()
     async def load(ctx, cog: str):
         await bot.load_extension(f"cogs.{cog.lower()}")
+        print(f"Someone Loaded {cog.lower()} Class")
         
     @bot.command()
     async def unload(ctx, cog: str):
         await bot.unload_extension(f"cogs.{cog.lower()}")
+        print(f"Someone Unloaded {cog.lower()} Class")
         
     @bot.command()
     async def reload(ctx, cog: str):
         await bot.reload_extension(f"cogs.{cog.lower()}")
+        print(f"Someone Reloaded {cog.lower()} Class")
 
     @bot.command()
     async def reloadcmd(ctx, cmd: str):

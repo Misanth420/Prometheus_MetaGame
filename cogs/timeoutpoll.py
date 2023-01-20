@@ -14,15 +14,15 @@ class TimeoutCog(commands.Cog):
     async def timeoutpoll(self, ctx, offender: discord.Member, emoji_count: int, timeout_time, *, description: str):
 
         
-        role = discord.utils.get(ctx.guild.roles, name=settings.DISCORD_ADMINCOG_REQ_ROLE)
+        role = discord.utils.get(ctx.guild.roles, name=settings.D_TIMEOUT_USE_ROLE)
         if role not in ctx.author.roles:
             await ctx.send(f"Sorry, level up to {role} in order to cast Ice Nova ")
-            return        
+            return
+
                
         if not isinstance(emoji_count, int) or emoji_count < 0:
             await ctx.send("Error: Emoji Count must be a positive integer.")
-            return
-        
+            return        
         timeout_regex = r'^\d+[dhmn]$'
         if not re.match(timeout_regex, timeout_time):
             await ctx.send("Error: timeout time must be in the format of number followed by letters 'd', 'h', or 'm'.\
@@ -62,6 +62,7 @@ class TimeoutCog(commands.Cog):
                     duration_seconds = adjusted_time.total_seconds()
                     print(adjusted_time, duration_seconds)
 
+
         if duration_seconds > 0 and duration_seconds < 7200:
             poll_duration_announce=duration_seconds / 60 / 5            # converting to minutes
             poll_duration_sleep=duration_seconds / 5                    # get the poll duration by /5 the timeout duration
@@ -81,8 +82,11 @@ class TimeoutCog(commands.Cog):
             \n**For {timeout_time}**")
         embed.set_footer(
             text=f'Timeout proposed by {ctx.author}')
+
         
-        message = await ctx.send(embed=embed)        
+        message = await ctx.send(embed=embed) 
+
+
         await message.add_reaction('👍')
         await message.add_reaction('👎')
         await ctx.send(
@@ -90,11 +94,12 @@ class TimeoutCog(commands.Cog):
                 \n\nPlease vote by signaling with:\
                 \n👍(thumbs up) if you AGREE or\
                 \n(thumbs down)👎 if you DISAGREE.```"
-            )        
-        await asyncio.sleep(poll_duration_sleep)
+            ) 
 
+        await asyncio.sleep(poll_duration_sleep)
         message = await ctx.channel.fetch_message(message.id)
         await self.timeout(ctx, message, offender, emoji_count, timeout_time, duration_seconds)
+
 
 
     async def timeout(self, ctx, message, offender, emoji_count, timeout_time, duration_seconds): 
