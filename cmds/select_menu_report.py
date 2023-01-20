@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord.ui import Select, View
 
 
+
 @commands.command()
 async def didathing(ctx):
     selectGuild = Select(
@@ -96,6 +97,7 @@ async def didathing(ctx):
     view.add_item(selectGuild)
     view.add_item(selectEffort)
     view.add_item(selectImpact)
+    
 
     await ctx.send("Use the fields below to create a report on your contribution.\n", view=view)
 
