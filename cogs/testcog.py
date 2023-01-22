@@ -58,6 +58,7 @@ class ImpactSelect(discord.ui.Select):
         )
     async def callback(self, interaction: discord.Interaction):
         await self.view.select_impact(interaction, self.values)
+        
 
 
 
@@ -98,7 +99,7 @@ class EffortSelect(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction):
         await self.view.select_effort(interaction, self.values)
-
+        
 
 
 class MyMenu(discord.ui.View):
@@ -110,7 +111,7 @@ class MyMenu(discord.ui.View):
     answer3 = None
 
     @discord.ui.select(
-        placeholder="Pick a guild",
+        #placeholder="Pick a guild",
         options=[
                 discord.SelectOption(
                     value="Art and Design",
@@ -142,7 +143,7 @@ class MyMenu(discord.ui.View):
     )
     async def select_guild(self, interaction: discord.Interaction, select_item : discord.ui.Select):
         self.answer1 = select_item.values
-        self.children[0].disabled = True
+        #self.children[0].disabled = True
         effort_select = EffortSelect()
         self.add_item(effort_select)
         await interaction.message.edit(view=self)
@@ -152,7 +153,7 @@ class MyMenu(discord.ui.View):
 
     async def select_effort(self, interaction : discord.Interaction, choices):
         self.answer2 = choices
-        self.children[1].disabled = True 
+        #self.children[1].disabled = True 
         impact_select = ImpactSelect()
         self.add_item(impact_select)
         await interaction.message.edit(view=self)
@@ -161,10 +162,10 @@ class MyMenu(discord.ui.View):
 
     async def select_impact(self, interaction : discord.Interaction, choices):
         self.answer3 = choices
-        self.children[2].disabled = True
+        #self.children[2].disabled = True
         await interaction.message.edit(view=self) 
         await interaction.response.defer()
-        self.stop  
+        self.stop()  
         print(f"{Back.GREEN}USER CHECK: 'SELECTMENU_BUTTON3' callback was called successfully! Data passed: {self.answer3}")     
         
         
@@ -209,21 +210,22 @@ class TestMenuCog(commands.Cog):
         view = MyMenu(timeout=None)
         await ctx.send(view=view)
 
+        await view.wait()
         
+
         report = {
             "GUILD BANNER": view.answer1,
             "EFFORT": view.answer2,
             "IMPACT": view.answer3
         }
 
-        await view.wait()
 
 
-        await ctx.followup(f"Reported! You picked: {report}")
+        await ctx.send(f"Reported! You picked: {report}")
        
         print(f"{Back.GREEN}USER CHECK: 'Select Menu' callback was called successfully!")
         if report: None
-        await ctx.followup("failed")        
+        await ctx.followup.send("failed")        
         print(f"{Back.RED}CHECK: Selected options didn't pass")
         
         
