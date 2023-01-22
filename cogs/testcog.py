@@ -4,7 +4,7 @@ from discord.ext import commands
 from discord.ui import Button, View, Modal, Select
 
 import colorama
-from colorama import Fore, Back
+from colorama import Fore, Back, Style
 colorama.init(autoreset=True)
 
 logger = settings.logging.getLogger("bot")
@@ -102,6 +102,47 @@ class EffortSelect(discord.ui.Select):
         
 
 
+class MenuButtons(discord.ui.View):
+    add_description = None
+    submit = None
+
+
+    @discord.ui.button(
+            label="add description",
+            style=discord.ButtonStyle.gray,
+            emoji="📜",
+            row=0)
+    async def button1callback(self, interaction: discord.Interaction, button : discord.ui.Button):
+        button.style=discord.ButtonStyle.green
+        button.emoji="✅"
+        button.label="description added!"
+        await interaction.response.edit_message(view=self)
+        await interaction.followup.send("Button1 changed!. Salute!", ephemeral=True)
+
+
+    @discord.ui.button(
+            label="submit",
+            style=discord.ButtonStyle.gray,
+            emoji="➕",
+            row=0)
+    async def button2callback(self, interaction: discord.Interaction, button : discord.ui.Button):
+        button.style=discord.ButtonStyle.green
+        button.emoji="✅"
+        button.label="submitted!"
+
+        try:
+            await interaction.response.edit_message(view=self)
+            await interaction.followup.send("Button2 changed!. Salute!", ephemeral=True) 
+            print(
+                f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+                    {Style.BRIGHT}{Back.CYAN}{Fore.BLACK}user clicked the second button")
+        except Exception as e:
+            await interaction.followup.send("Something went wrong")
+            print(
+                f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
+                    {Style.BRIGHT}{Back.BLACK}{Fore.RED}code error example")
+
+
 class MyMenu(discord.ui.View):
     # def __init__(self, *, timeout=None):
     #     super().__init__(timeout=timeout)
@@ -149,7 +190,8 @@ class MyMenu(discord.ui.View):
         await interaction.message.edit(view=self)
         await interaction.response.defer()
         print(
-            f"{Back.GREEN}USER CHECK: 'SELECTMENU_BUTTON_1' callback was called successfully! Data passed: {self.answer1}")
+            f"{Style.BRIGHT}{Back.GREEN}USER:{Style.RESET_ALL}\
+                {Style.BRIGHT}{Fore.GREEN}'GUILD' callback was called successfully! Data passed: {Fore.MAGENTA}{self.answer1}")  
 
     async def select_effort(self, interaction : discord.Interaction, choices):
         self.answer2 = choices
@@ -158,7 +200,9 @@ class MyMenu(discord.ui.View):
         self.add_item(impact_select)
         await interaction.message.edit(view=self)
         await interaction.response.defer() 
-        print(f"{Back.GREEN}USER CHECK: 'SELECTMENU_BUTTON2' callback was called successfully! Data passed: {self.answer2}")
+        print(
+            f"{Style.BRIGHT}{Back.GREEN}USER:{Style.RESET_ALL}\
+                {Style.BRIGHT}{Fore.GREEN}'EFFORT' callback was called successfully! Data passed: {Fore.MAGENTA}{self.answer2}")  
 
     async def select_impact(self, interaction : discord.Interaction, choices):
         self.answer3 = choices
@@ -166,33 +210,15 @@ class MyMenu(discord.ui.View):
         await interaction.message.edit(view=self) 
         await interaction.response.defer()
         self.stop()  
-        print(f"{Back.GREEN}USER CHECK: 'SELECTMENU_BUTTON3' callback was called successfully! Data passed: {self.answer3}")     
+        print(
+            f"{Style.BRIGHT}{Back.GREEN}USER:{Style.RESET_ALL}\
+                {Style.BRIGHT}{Fore.GREEN}'IMPACT' callback was called successfully! Data passed: {Fore.MAGENTA}{self.answer3[:1:]}")     
         
         
 
+    #    print(f"{Back.GREEN}USER CHECK: 'TEST_BUTTON1' callback was called successfully! User calling: {interaction.user}")
 
-    # @discord.ui.button(
-    #         label="test1",
-    #         style=discord.ButtonStyle.gray,
-    #         emoji="➕",
-    #         row=3)
-    # async def test1callback(self, interaction: discord.Interaction, button : discord.ui.Button):
-    #     button.style=discord.ButtonStyle.green
-    #     await interaction.response.edit_message(content=f"The message was edited", view=self)
-    #     await interaction.followup.send("Button1 changed!. Salute!")
-
-
-    #     print(f"{Back.GREEN}USER CHECK: 'TEST_BUTTON1' callback was called successfully! User calling: {interaction.user}")
-
-    # @discord.ui.button(
-    #         label="test2",
-    #         style=discord.ButtonStyle.gray,
-    #         emoji="✅",
-    #         row=3)
-    # async def test2callback(self, interaction: discord.Interaction, button : discord.ui.Button):
-    #     button.style=discord.ButtonStyle.green
-    #     await interaction.response.edit_message(content=f"The message was edited", view=self)
-    #     await interaction.followup.send("Button2 changed!. Salute!") 
+    
     
 
     #     print(f"{Back.GREEN}USER CHECK: 'TEST_BUTTON1' callback was called successfully! User calling: {interaction.user}")
@@ -207,11 +233,11 @@ class TestMenuCog(commands.Cog):
 
     @commands.command()
     async def testcommand(self, ctx):
-        view = MyMenu(timeout=None)
+        view = MyMenu(timeout=None)        
         await ctx.send(view=view)
 
         await view.wait()
-        
+
 
         report = {
             "GUILD BANNER": view.answer1,
@@ -221,18 +247,25 @@ class TestMenuCog(commands.Cog):
 
 
 
-        await ctx.send(f"Reported! You picked: {report}")
-       
-        print(f"{Back.GREEN}USER CHECK: 'Select Menu' callback was called successfully!")
-        if report: None
-        await ctx.followup.send("failed")        
-        print(f"{Back.RED}CHECK: Selected options didn't pass")
-        
-        
-        
+        await ctx.send(f"You are about to pick the following:\
+            \n**GUILD BANNER: **{view.answer1}\
+            \n**INVESTED EFFORT: **{view.answer2}\
+            \n**PROJECTED IMPACT: **{view.answer3}", ephemeral=True)        
+        print(
+    f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
+        {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{report}{Style.RESET_ALL} {Fore.CYAN}by {ctx.author}")
 
-
-        print(f"{Back.YELLOW}DATA: The following data was passed: {report} by {ctx.author}")
+        view2 = MenuButtons(timeout=None)
+        try:
+            await ctx.send(view=view2)
+            print(
+                f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+                    {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}second view sent.")
+        except Exception as e:
+            await ctx.send("error")
+            print(
+                f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
+                    {Style.BRIGHT}{Back.BLACK}{Fore.RED}failed sending second view.")
 
 
       
