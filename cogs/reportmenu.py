@@ -7,6 +7,8 @@ import colorama
 from colorama import Fore, Back
 colorama.init(autoreset=True)
 
+logger = settings.logging.getLogger("bot")
+
 class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
     description = discord.ui.TextInput(
         style=discord.TextStyle.long,
@@ -27,6 +29,26 @@ class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
         ...
     async def on_error(self, interaction: discord.Interaction, error):
         ...
+
+
+class SubmitButton(discord.ui.View):
+    def __init__(self, *, timeout=360):
+        super().__init__(timeout=timeout)
+        print(f"{Fore.GREEN}CHECK: SubmitButton class reached.")
+
+    @discord.ui.button(
+            label="test",
+            style=discord.ButtonStyle.gray,
+            emoji="➕")
+
+    async def callback(self, interaction: discord.Interaction, submit_button: discord.ui.Button):
+        submit_button.style=discord.ButtonStyle.green
+        await interaction.response.edit_message(content=f"The message was edited", view=self)
+        await interaction.followup.send("Report submitted. Salute!")
+
+        print(f"{Back.GREEN}USER CHECK: 'submit_button' callback was called successfully! User calling: {interaction.user}")
+
+
 
 class ReportCog(commands.Cog):
     def __init__(self, bot):
@@ -52,13 +74,7 @@ class ReportCog(commands.Cog):
             print(f"{Fore.GREEN}CHECK: Channel '{channel}' was passed")
             await ctx.send(f"Menu sent to {channel.mention}!")                                 
             await self.didathing(ctx, channel)
-        
-        
-    
-
-        
-
-        
+  
             
     async def didathing(self, ctx, channel:discord.TextChannel):
         selectGuild = Select(
@@ -145,8 +161,8 @@ class ReportCog(commands.Cog):
                 f"You are projecting that your contribution will have **{selectImpact.values[0]}**.", ephemeral=True)
         
         report_button = Button(
-            label="Report Contribution",
-            style=discord.ButtonStyle.blurple,
+            label="Describe Contribution",
+            style=discord.ButtonStyle.gray,
             emoji="📜"
         )            
         async def report_button_callback(interaction):
@@ -155,26 +171,32 @@ class ReportCog(commands.Cog):
 
         async def report(interaction):
             report_modal = ReportModal()
-            await interaction.response.send_modal(report_modal)  
+            await interaction.response.send_modal(report_modal)
+        
         
                 
         selectGuild.callback = submissionG_callback    
         selectEffort.callback = submissionE_callback
         selectImpact.callback = submissionI_callback
         report_button.callback = report
-                
+        
               
-        channel = channel
-        print(f"{Fore.GREEN}CHECK: Channel '{channel}' was confirmed") 
+        
+        #submit_button = SubmitButton()
+        print(f"{Fore.GREEN}CHECK: Channel '{channel}' was passed successfully") 
       
-        view = View()
+        view = SubmitButton(timeout=None)
         view.add_item(selectGuild)
         view.add_item(selectEffort)
         view.add_item(selectImpact)
         view.add_item(report_button)
-        await channel.send("Test", view=view)
-        print(f"{Fore.GREEN}CHECK: 'report_menu' was sent successfully!")
+        #view.add_item(submit_button)
 
+        await channel.send("**⏬⏬**`Use the fields below to report on your contribution.`**⏬⏬**\n\
+            \n\n", view=SubmitButton())
+        print(f"{Fore.GREEN}CHECK: 'report_menu' was sent successfully!")
+        
+        
 
 async def setup(bot):
     await bot.add_cog(ReportCog(bot))
