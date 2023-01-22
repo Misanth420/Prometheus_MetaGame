@@ -9,27 +9,6 @@ colorama.init(autoreset=True)
 
 logger = settings.logging.getLogger("bot")
 
-# class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
-#     description = discord.ui.TextInput(
-#         style=discord.TextStyle.long,
-#         max_length=420,
-#         label="Description",
-#         required=True,
-#         placeholder="Describe what you did here..."
-#         )
-#     artefact = discord.ui.TextInput(
-#         style=discord.TextStyle.short,
-#         label="Artefact",
-#         required=True,
-#         placeholder="Paste a URL relevant to your contribution here..."
-#     )
-
-
-#     async def on_submit(self, interaction: discord.Interaction):
-#         ...
-#     async def on_error(self, interaction: discord.Interaction, error):
-#         ...
-
 class ImpactSelect(discord.ui.Select):
     def __init__(self):
         options=[
@@ -58,8 +37,6 @@ class ImpactSelect(discord.ui.Select):
         )
     async def callback(self, interaction: discord.Interaction):
         await self.view.select_impact(interaction, self.values)
-        
-
 
 
 class EffortSelect(discord.ui.Select):
@@ -101,10 +78,54 @@ class EffortSelect(discord.ui.Select):
         await self.view.select_effort(interaction, self.values)
         
 
+class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
+    description = discord.ui.TextInput(
+        style=discord.TextStyle.long,
+        max_length=420,
+        label="Description",
+        required=True,
+        placeholder="Describe what you did here..."
+        )
+    artefact = discord.ui.TextInput(
+        style=discord.TextStyle.short,
+        label="Artefact",
+        required=True,
+        placeholder="Paste a URL relevant to your contribution here..."
+    )
 
-class MenuButtons(discord.ui.View):
+    
+    async def on_submit(self, interaction: discord.Interaction):
+        description = self.description.value
+        await interaction.response.defer()
+        print(description)
+        print(
+            f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+                {Style.BRIGHT}{Back.CYAN}{Fore.BLACK}user submitted a modal successfully")
+
+    async def on_error(self, interaction: discord.Interaction, error):
+        ...
+
+
+class SubmitButton(discord.ui.View):
     add_description = None
     submit = None
+   
+
+    @discord.ui.button(
+            label="add description",
+            style=discord.ButtonStyle.gray,
+            emoji="➕",
+            row=0) 
+    async def button2callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+                
+        report_modal = ReportModal()
+        await interaction.response.send_modal(report_modal)        
+        print(
+            f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+                {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}modal sent successfully")
+        await interaction.followup.send("Button1 changed!. Salute!", ephemeral=True)
+    
+        
 
 
     @discord.ui.button(
@@ -118,29 +139,6 @@ class MenuButtons(discord.ui.View):
         button.label="description added!"
         await interaction.response.edit_message(view=self)
         await interaction.followup.send("Button1 changed!. Salute!", ephemeral=True)
-
-
-    @discord.ui.button(
-            label="submit",
-            style=discord.ButtonStyle.gray,
-            emoji="➕",
-            row=0)
-    async def button2callback(self, interaction: discord.Interaction, button : discord.ui.Button):
-        button.style=discord.ButtonStyle.green
-        button.emoji="✅"
-        button.label="submitted!"
-
-        try:
-            await interaction.response.edit_message(view=self)
-            await interaction.followup.send("Button2 changed!. Salute!", ephemeral=True) 
-            print(
-                f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
-                    {Style.BRIGHT}{Back.CYAN}{Fore.BLACK}user clicked the second button")
-        except Exception as e:
-            await interaction.followup.send("Something went wrong")
-            print(
-                f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
-                    {Style.BRIGHT}{Back.BLACK}{Fore.RED}code error example")
 
 
 class MyMenu(discord.ui.View):
@@ -213,16 +211,6 @@ class MyMenu(discord.ui.View):
         print(
             f"{Style.BRIGHT}{Back.GREEN}USER:{Style.RESET_ALL}\
                 {Style.BRIGHT}{Fore.GREEN}'IMPACT' callback was called successfully! Data passed: {Fore.MAGENTA}{self.answer3[:1:]}")     
-        
-        
-
-    #    print(f"{Back.GREEN}USER CHECK: 'TEST_BUTTON1' callback was called successfully! User calling: {interaction.user}")
-
-    
-    
-
-    #     print(f"{Back.GREEN}USER CHECK: 'TEST_BUTTON1' callback was called successfully! User calling: {interaction.user}")
-
 
 
 class TestMenuCog(commands.Cog):
@@ -233,6 +221,9 @@ class TestMenuCog(commands.Cog):
 
     @commands.command()
     async def testcommand(self, ctx):
+        print(
+            f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+                {Style.BRIGHT}{Back.CYAN}{Fore.BLACK}user {ctx.author} successfully called testcommand")
         view = MyMenu(timeout=None)        
         await ctx.send(view=view)
 
@@ -245,8 +236,6 @@ class TestMenuCog(commands.Cog):
             "IMPACT": view.answer3
         }
 
-
-
         await ctx.send(f"You are about to pick the following:\
             \n**GUILD BANNER: **{view.answer1}\
             \n**INVESTED EFFORT: **{view.answer2}\
@@ -255,19 +244,22 @@ class TestMenuCog(commands.Cog):
     f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
         {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{report}{Style.RESET_ALL} {Fore.CYAN}by {ctx.author}")
 
-        view2 = MenuButtons(timeout=None)
+       
+
+        
+
+        view3 = SubmitButton(timeout=None)
         try:
-            await ctx.send(view=view2)
+            await ctx.send(view=view3)
             print(
-                f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
-                    {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}second view sent.")
+            f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+                {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}second view was sent successfully.")
         except Exception as e:
             await ctx.send("error")
             print(
                 f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
-                    {Style.BRIGHT}{Back.BLACK}{Fore.RED}failed sending second view.")
-
-
+                    {Style.BRIGHT}{Back.BLACK}{Fore.RED}failed to send second view.")
+  
       
 
 async def setup(bot):
