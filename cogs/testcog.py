@@ -76,7 +76,8 @@ class EffortSelect(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction):
         await self.view.select_effort(interaction, self.values)
-        
+
+    
 
 class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
     description = discord.ui.TextInput(
@@ -92,54 +93,116 @@ class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
         required=True,
         placeholder="Paste a URL relevant to your contribution here..."
     )
-
     
-    async def on_submit(self, interaction: discord.Interaction):
-        description = self.description.value
-        await interaction.response.defer()
-        print(description)
-        print(
-            f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
-                {Style.BRIGHT}{Back.CYAN}{Fore.BLACK}user submitted a modal successfully")
+    
+    async def on_submit(self, interaction: discord.Interaction):         
+        # description_output = self.description.value
+        # artefact_output = self.artefact.value
+        
+        description_output = self.description #.value
+        artefact_output = self.artefact #.value
+        
+        try:            
+            await interaction.response.send_message("Description added! Click submit when ready. Salute!", ephemeral=True)  
+           
+            print(
+        f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+            {Style.BRIGHT}{Back.CYAN}{Fore.BLACK}user submitted a modal successfully")          
+            print(
+        f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
+            {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{description_output}, {artefact_output} | {Style.RESET_ALL} {Fore.CYAN}by {interaction.user}")
+            await SubmitButtonView.modalcallback(self, interaction, description_output, artefact_output)
+            self.stop()
+            
+            
+            
+        except Exception as e:
+            await interaction.response.send_message("Something went wrong")
+        
+    
 
     async def on_error(self, interaction: discord.Interaction, error):
-        ...
+        await interaction.response.send_message("Something went wrong. Modal NOT submitted.")
+        print(
+            f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
+                {Style.BRIGHT}{Back.BLACK}{Fore.RED}failed to submit modal.")
+
+    # async def modalresults(self, interaction: discord.Interaction):
+    #     description = self.description.value
+    #     artefact = self.artefact.value
 
 
-class SubmitButton(discord.ui.View):
-    add_description = None
-    submit = None
-   
+class SubmitButtonView(discord.ui.View):
+    
+    
+    artefact = None
+    description = None
+    
+    foo : bool = None
+    
+
+    async def disable_menu(self):
+        for item in self.children:
+            item.disabled = True
+        await self.message.edit(view=self)
+
+    async def on_timeout(self) -> None:
+        await self.message.channel.send("timed out..")
+        await self.disable_menu()
+
+
 
     @discord.ui.button(
             label="add description",
             style=discord.ButtonStyle.gray,
             emoji="➕",
             row=0) 
-    async def button2callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def button1callback(self, interaction: discord.Interaction, button: discord.ui.Button): 
                 
         report_modal = ReportModal()
+        report_modal.user = interaction.user
+        
         await interaction.response.send_modal(report_modal)        
         print(
             f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
                 {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}modal sent successfully")
-        await interaction.followup.send("Button1 changed!. Salute!", ephemeral=True)
-    
+        #await report_modal.on_submit(self, interaction, button)
         
 
-
     @discord.ui.button(
-            label="add description",
+            label="Submit Report",
             style=discord.ButtonStyle.gray,
             emoji="📜",
             row=0)
-    async def button1callback(self, interaction: discord.Interaction, button : discord.ui.Button):
+    async def button2callback(self, interaction: discord.Interaction, button : discord.ui.Button):
         button.style=discord.ButtonStyle.green
         button.emoji="✅"
-        button.label="description added!"
+        button.label="description added!" 
+        await self.disable_menu()       
         await interaction.response.edit_message(view=self)
-        await interaction.followup.send("Button1 changed!. Salute!", ephemeral=True)
+        
+        
+        #await interaction.response.defer()
+        print(
+            f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+                {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}report submitted and buttons view locked successfully")
+         
+        self.foo = True
+        #self.stop()
+        
 
+    async def modalcallback(self, interaction : discord.Interaction, description_output, artefact_output):
+        
+        self.description = description_output.values
+        self.artefact = artefact_output.values
+        print(f"DATA PASSED: {self.description}, {self.artefact}")
+        await interaction.response.send_message("Modal passed")
+        #await interaction.response.defer()
+        self.stop()
+    
+
+
+    
 
 class MyMenu(discord.ui.View):
     # def __init__(self, *, timeout=None):
@@ -148,6 +211,7 @@ class MyMenu(discord.ui.View):
     answer1 = None
     answer2 = None
     answer3 = None
+    
 
     @discord.ui.select(
         #placeholder="Pick a guild",
@@ -207,10 +271,11 @@ class MyMenu(discord.ui.View):
         #self.children[2].disabled = True
         await interaction.message.edit(view=self) 
         await interaction.response.defer()
-        self.stop()  
+        self.stop() 
         print(
             f"{Style.BRIGHT}{Back.GREEN}USER:{Style.RESET_ALL}\
                 {Style.BRIGHT}{Fore.GREEN}'IMPACT' callback was called successfully! Data passed: {Fore.MAGENTA}{self.answer3[:1:]}")     
+
 
 
 class TestMenuCog(commands.Cog):
@@ -230,37 +295,73 @@ class TestMenuCog(commands.Cog):
         await view.wait()
 
 
-        report = {
-            "GUILD BANNER": view.answer1,
-            "EFFORT": view.answer2,
-            "IMPACT": view.answer3
-        }
 
-        await ctx.send(f"You are about to pick the following:\
-            \n**GUILD BANNER: **{view.answer1}\
-            \n**INVESTED EFFORT: **{view.answer2}\
-            \n**PROJECTED IMPACT: **{view.answer3}", ephemeral=True)        
-        print(
-    f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{report}{Style.RESET_ALL} {Fore.CYAN}by {ctx.author}")
-
-       
+        view2 = SubmitButtonView(timeout=None)
+        print("PROGRAM STILL RUNNING")
 
         
-
-        view3 = SubmitButton(timeout=None)
         try:
-            await ctx.send(view=view3)
+            message = await ctx.send(view=view2)
+            view2.message = message
             print(
             f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
-                {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}second view was sent successfully.")
+                {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}buttons view sent successfully!")
         except Exception as e:
             await ctx.send("error")
             print(
                 f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
-                    {Style.BRIGHT}{Back.BLACK}{Fore.RED}failed to send second view.")
-  
-      
+                    {Style.BRIGHT}{Back.BLACK}{Fore.RED}failed to send buttons view.")
+
+        print("PROGRAM STILL RUNNING 2")
+
+
+        
+
+        
+        view3 = ReportModal(timeout=5)
+        await view2.wait()
+        
+        
+
+        print("data flow check:")
+
+        print({view3.artefact}, {view3.description})
+        print({view3.artefact.value}, {view3.description.value})
+
+        print(view2.description)
+        print(view2.artefact)
+
+
+
+        
+
+        print("PROGRAM STILL RUNNING 3")
+
+        
+        await self.ctx.response.send_message("test")
+
+     
+        if view2.foo is None:
+            logger.error("Timeout")
+        elif view2.foo is True:
+            logger.info("Someone locked the view")
+        else:
+            logger.error("Canceled")
+
+
+        print("PROGRAM STILL RUNNING 4")
+
+
+        await ctx.send(f"You are about to pick the following:\
+            \n**GUILD BANNER: **{view.answer1}\
+            \n**INVESTED EFFORT: **{view.answer2}\
+            \n**PROJECTED IMPACT: **{view.answer3}\
+            \n**DESCRIPTION: **{view3.description}\
+            \n**ARTEFACT: **{view3.artefact}")        
+        print(
+    f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
+        {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{view.answer1}, {view.answer2}, {view.answer3}{Style.RESET_ALL} {Fore.CYAN}by {ctx.author}")
+
 
 async def setup(bot):
     await bot.add_cog(TestMenuCog(bot))
