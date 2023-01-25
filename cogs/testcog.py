@@ -101,9 +101,14 @@ class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
         
         description_output = self.description #.value
         artefact_output = self.artefact #.value
+
+        #list
         
         try:            
-            await interaction.response.send_message("Description added! Click submit when ready. Salute!", ephemeral=True)  
+            #await interaction.followup.send("passed")
+            #await interaction.response.send_message("Description added! Click submit when ready. Salute!", ephemeral=True)  
+            await interaction.response.defer()  
+
            
             print(
         f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
@@ -112,12 +117,15 @@ class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
         f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
             {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{description_output}, {artefact_output} | {Style.RESET_ALL} {Fore.CYAN}by {interaction.user}")
             await SubmitButtonView.modalcallback(self, interaction, description_output, artefact_output)
-            self.stop()
+            
+            
+            
             
             
             
         except Exception as e:
-            await interaction.response.send_message("Something went wrong")
+            
+            print(e)
         
     
 
@@ -166,7 +174,7 @@ class SubmitButtonView(discord.ui.View):
         print(
             f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
                 {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}modal sent successfully")
-        #await report_modal.on_submit(self, interaction, button)
+        await report_modal.on_submit(interaction)
         
 
     @discord.ui.button(
@@ -177,7 +185,7 @@ class SubmitButtonView(discord.ui.View):
     async def button2callback(self, interaction: discord.Interaction, button : discord.ui.Button):
         button.style=discord.ButtonStyle.green
         button.emoji="✅"
-        button.label="description added!" 
+        button.label="description submitted!" 
         await self.disable_menu()       
         await interaction.response.edit_message(view=self)
         
@@ -188,16 +196,20 @@ class SubmitButtonView(discord.ui.View):
                 {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}report submitted and buttons view locked successfully")
          
         self.foo = True
-        #self.stop()
+        self.stop()
         
 
     async def modalcallback(self, interaction : discord.Interaction, description_output, artefact_output):
         
-        self.description = description_output.values
-        self.artefact = artefact_output.values
-        print(f"DATA PASSED: {self.description}, {self.artefact}")
-        await interaction.response.send_message("Modal passed")
-        #await interaction.response.defer()
+        self.description = description_output
+        self.artefact = artefact_output
+        print(f"DATA PASSED: {self.description}, {self.artefact}. modal callback reached")
+        
+        await interaction.followup.send(f"You are about to submit the following:\
+            \n`DESCRIPTION`\
+            \n**_{self.description}_**\
+            \n`ARTEFACT`\
+            \n_{self.artefact}_")
         self.stop()
     
 
@@ -285,7 +297,7 @@ class TestMenuCog(commands.Cog):
 
 
     @commands.command()
-    async def testcommand(self, ctx):
+    async def tc(self, ctx):
         print(
             f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
                 {Style.BRIGHT}{Back.CYAN}{Fore.BLACK}user {ctx.author} successfully called testcommand")
@@ -306,6 +318,7 @@ class TestMenuCog(commands.Cog):
             print(
             f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
                 {Style.BRIGHT}{Back.BLACK}{Fore.GREEN}buttons view sent successfully!")
+            
         except Exception as e:
             await ctx.send("error")
             print(
@@ -317,16 +330,23 @@ class TestMenuCog(commands.Cog):
 
         
 
-        
-        view3 = ReportModal(timeout=5)
+        await ctx.send(f"You are about to pick the following:\
+            \n`GUILD BANNER: `_{view.answer1}_\
+            \n`INVESTED EFFORT: `_{view.answer2}_\
+            \n`PROJECTED IMPACT: `_{view.answer3}_")        
+        print(
+    f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
+        {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{view.answer1}, {view.answer2}, {view.answer3}{Style.RESET_ALL} {Fore.CYAN}by {ctx.author}")
+        #view3 = ReportModal(timeout=5)
         await view2.wait()
+        #await view2.wait()
         
         
 
         print("data flow check:")
 
-        print({view3.artefact}, {view3.description})
-        print({view3.artefact.value}, {view3.description.value})
+        print({view2.artefact}, {view2.description})
+        print({view2.artefact}, {view2.description})
 
         print(view2.description)
         print(view2.artefact)
@@ -338,7 +358,7 @@ class TestMenuCog(commands.Cog):
         print("PROGRAM STILL RUNNING 3")
 
         
-        await self.ctx.response.send_message("test")
+        
 
      
         if view2.foo is None:
@@ -348,19 +368,11 @@ class TestMenuCog(commands.Cog):
         else:
             logger.error("Canceled")
 
-
+        await view2.wait()
         print("PROGRAM STILL RUNNING 4")
 
 
-        await ctx.send(f"You are about to pick the following:\
-            \n**GUILD BANNER: **{view.answer1}\
-            \n**INVESTED EFFORT: **{view.answer2}\
-            \n**PROJECTED IMPACT: **{view.answer3}\
-            \n**DESCRIPTION: **{view3.description}\
-            \n**ARTEFACT: **{view3.artefact}")        
-        print(
-    f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{view.answer1}, {view.answer2}, {view.answer3}{Style.RESET_ALL} {Fore.CYAN}by {ctx.author}")
+        
 
 
 async def setup(bot):
