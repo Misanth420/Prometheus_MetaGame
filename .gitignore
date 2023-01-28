@@ -159,4 +159,12 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# Extra
 .vscode/
+testcogs/
+
+models/
+database.py
+database.ini
+config.py
+prometheus.db
