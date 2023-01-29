@@ -44,7 +44,7 @@ def run():
         try:
             guild = Guild.get(Guild.guild_id == D_GUILD_ID)
             prefix = guild.guild_prefix
-            print(f"db found and prefix set to {prefix}")
+            print(f"guild found and prefix set to {prefix}")
         except peewee.DoesNotExist:
             guild = Guild.create(
                 Guild.guild_id == D_GUILD_ID, Guild.guild_prefix == "!"
@@ -83,6 +83,7 @@ def run():
                     end="",
                 )
                 print(f"{f' tcogs.{testcog_file.name[:-3]}'}")
+        await bot.tree.sync()
 
         for cmd_file in CMDS_DIR.glob("*.py"):
             if cmd_file.name != "__init__.py":
@@ -141,9 +142,25 @@ def run():
             )
 
     @bot.command()
+    async def testreload(ctx, testcog: str):
+        try:
+            await bot.reload_extension(f"testcogs.{testcog.lower()}")
+            await ctx.send("`TEST MATRIX RELOADED`")
+            print(
+                f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+        {Style.BRIGHT}{Fore.GREEN}USER {Back.BLACK}{Fore.CYAN}{ctx.author}{Fore.GREEN} reloaded >>{Fore.CYAN}{testcog.lower()}{Fore.GREEN}<< successfully!"
+            )
+        except Exception as e:
+            await ctx.send("`MATRIX FAILED`")
+            print(
+                f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
+        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to reload >>{Fore.CYAN}{ctx.message.content[12:]}{Fore.YELLOW}<< . Check if spelled correctly"
+            )
+
+    @bot.command()
     async def reloadcmd(ctx, cmd: str):
         try:
-            await bot.reload_extension(f"cogs.{cmd.lower()}")
+            await bot.reload_extension(f"cmds.{cmd.lower()}")
             await ctx.send("`LOCK N LOAD`")
             print(
                 f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
