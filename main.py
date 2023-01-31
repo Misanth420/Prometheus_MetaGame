@@ -23,6 +23,8 @@ from settings import (
     logging,
 )
 
+from testcogs.didathing import MyMenuView
+
 import database
 import peewee
 from models.guild import Guild
@@ -83,14 +85,14 @@ def run():
                     end="",
                 )
                 print(f"{f' tcogs.{testcog_file.name[:-3]}'}")
-        await bot.tree.sync()
+        await bot.tree.sync(guild=discord.Object(id=D_GUILD_ID))
 
         for cmd_file in CMDS_DIR.glob("*.py"):
             if cmd_file.name != "__init__.py":
                 await bot.load_extension(f"cmds.{cmd_file.name[:-3]}")
                 print(f"{Back.GREEN}{Fore.WHITE}{Style.BRIGHT}Command loaded:", end="")
                 print(f"{f' cmds.{cmd_file.name[:-3]}'}")
-        await bot.tree.sync()
+        await bot.tree.sync(guild=discord.Object(id=D_GUILD_ID))
 
     @bot.command()
     async def load(ctx, cog: str):

@@ -209,13 +209,7 @@ class SubmitButtonView(discord.ui.View):
         logger.info(
             f"User is submitting description: {self.descriptionreply} and artefact: {self.artefactreply}"
         )
-        await interaction.followup.send(
-            f"You are about to submit the following:\
-            \n`DESCRIPTION`\
-            \n**_{self.description}_**\
-            \n`ARTEFACT`\
-            \n_{self.artefact}_"
-        )
+        # await interaction.response.defer()
         logger.info("Submission process completed.")
 
         self.stop()

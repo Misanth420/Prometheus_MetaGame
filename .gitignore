@@ -164,6 +164,7 @@ cython_debug/
 testcogs/
 
 models/
+img/
 database.py
 database.ini
 config.py
