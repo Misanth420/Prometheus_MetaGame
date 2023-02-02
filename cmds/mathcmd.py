@@ -8,23 +8,28 @@ async def math(ctx):
 
 
 @math.command()
-async def add(ctx, one: int, two: int):
-    await ctx.send(one + two)
+async def add(ctx, x: int, y: int):
+    await ctx.send(x + y)
 
 
 @math.command()
-async def sub(ctx, one: int, two: int):
-    await ctx.send(one - two)
+async def sub(ctx, x: int, y: int):
+    await ctx.send(x - y)
 
 
 @math.command()
-async def mul(ctx, one: int, two: int):
-    await ctx.send(one * two)
+async def mul(ctx, x: int, y: int):
+    await ctx.send(x * y)
 
 
 @math.command()
-async def mul(ctx, one: int, two: int):
-    await ctx.send(one / two)
+async def div(ctx, x: int, y: int):
+    await ctx.send(x / y)
+
+
+@math.command()
+async def pct(ctx, x: int, y: int):
+    await ctx.send(f"`{x} is {x/y*100}% of {y}`")
 
 
 async def setup(bot):

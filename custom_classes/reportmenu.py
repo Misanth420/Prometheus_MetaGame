@@ -151,7 +151,10 @@ class PersistentView(discord.ui.View):
             4, name="Artefact", value=f"{report_modal.artefact}", inline=False
         )
         await interaction.followup.send(
-            "This is a preview of the report you're about to submit:",
+            (
+                f"This is a preview of the report you're about to submit.\
+        \n**Please click** `🔺SUBMIT REPORT` **if happy**"
+            ),
             file=random_header_image,
             embed=reportembed,
             ephemeral=True,
