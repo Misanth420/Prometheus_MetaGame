@@ -23,8 +23,6 @@ from settings import (
     logging,
 )
 
-from testcogs.didathing import MyMenuView
-
 import database
 import peewee
 from models.guild import Guild
@@ -76,6 +74,7 @@ def run():
                     f"{Back.GREEN}{Fore.WHITE}{Style.BRIGHT}Extension loaded:", end=""
                 )
                 print(f"{f' cogs.{cog_file.name[:-3]}'}")
+        await bot.tree.sync(guild=discord.Object(id=D_GUILD_ID))
 
         for testcog_file in TESTCOGS_DIR.glob("*.py"):
             if testcog_file.name != "__init__.py":

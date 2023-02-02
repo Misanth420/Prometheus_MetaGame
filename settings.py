@@ -25,6 +25,7 @@ BASE_DIR = pathlib.Path(__file__).parent
 CMDS_DIR = BASE_DIR / "cmds"
 COGS_DIR = BASE_DIR / "cogs"
 TESTCOGS_DIR = BASE_DIR / "testcogs"
+CUSTOM_CLASSES_DIR = BASE_DIR / "classes"
 
 
 LOGGING_CONFIG = {
