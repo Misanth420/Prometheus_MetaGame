@@ -157,24 +157,7 @@ def run():
             await ctx.send(f"`{cog} MATRIX HAS FAILED TO LOAD`")
             print(
                 f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to load >>{Fore.CYAN}{ctx.message.content[6:]}{Fore.YELLOW}<< . Check if spelled correctly"
-            )
-
-    @bot.command()
-    async def loadclass(ctx, custom_classes: str):
-        try:
-            await bot.load_extension(f"custom_classes.{custom_classes.lower()}")
-            await ctx.send(f"`{custom_classes} MATRIX HAS BEEN LOADED`")
-            print(
-                f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Fore.GREEN}USER {Back.BLACK}{Fore.CYAN}{ctx.author}{Fore.GREEN} loaded >>{Fore.CYAN}{custom_classes.lower()}{Fore.GREEN}<< successfully!"
-            )
-
-        except Exception as e:
-            await ctx.send(f"`{custom_classes} MATRIX HAS FAILED TO LOAD`")
-            print(
-                f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to load >>{Fore.CYAN}{ctx.message.content[11:]}{Fore.YELLOW}<< . Check if spelled correctly"
+        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to load >>{Fore.CYAN}{ctx.message.content[9:]}{Fore.YELLOW}<< . Check if spelled correctly"
             )
 
     @bot.command()
@@ -239,6 +222,23 @@ def run():
             print(
                 f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
         {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to reload '{ctx.message.content}'. Check if spelled correctly"
+            )
+
+    @bot.command()
+    async def reloadclass(ctx, custom_classes: str):
+        try:
+            await bot.reload_extension(f"custom_classes.{custom_classes.lower()}")
+            await ctx.send(f"`{custom_classes} MATRIX HAS BEEN LOADED`")
+            print(
+                f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+        {Style.BRIGHT}{Fore.GREEN}USER {Back.BLACK}{Fore.CYAN}{ctx.author}{Fore.GREEN} loaded >>{Fore.CYAN}{custom_classes.lower()}{Fore.GREEN}<< successfully!"
+            )
+
+        except Exception as e:
+            await ctx.send(f"`{custom_classes} MATRIX HAS FAILED TO LOAD`")
+            print(
+                f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
+        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to load >>{Fore.CYAN}{ctx.message.content[11:]}{Fore.YELLOW}<< . Check if spelled correctly"
             )
 
     bot.run(DISCORD_API_SECRET)

@@ -81,10 +81,14 @@ class PersistentView(discord.ui.View):
 
     foo: bool = None
 
-    # async def enable_submit_button():
-    #     for item in PersistentView.children:
-    #         item.disable = False
-    #     await message.edit(view=PersistentView)
+    async def enable_submit_button(self):
+        for item in self.children:
+            item.disabled = False
+        await self.message.edit(view=self)
+        print("view edit reached")
+
+    async def on_timeout(self) -> None:
+        await self.enable_submit_button()
 
     @discord.ui.button(
         label="add description",
@@ -93,10 +97,10 @@ class PersistentView(discord.ui.View):
         custom_id="report_view:modal_button",
         row=4,
     )
-    async def button2callback(
+    async def add_desc_callback(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        button.style = discord.ButtonStyle.green
+
         report_modal = ReportModal(timeout=None)
         report_modal.user = interaction.user
 
@@ -166,6 +170,7 @@ class PersistentView(discord.ui.View):
             embed=reportembed,
             ephemeral=True,
         )
+        await self.enable_submit_button()
 
     @discord.ui.button(
         label="Submit Report",
@@ -175,12 +180,11 @@ class PersistentView(discord.ui.View):
         row=4,
         disabled=True,
     )
-    async def button1callback(
+    async def submit_report_callback(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        button.style = (discord.ButtonStyle.green,)
-        button.label = ("Submit Report",)
-        button.disabled = (False,)
+
+        button.disabled = True
 
         reportembed = discord.Embed(
             colour=discord.Colour.magenta(),
@@ -233,11 +237,13 @@ class PersistentView(discord.ui.View):
             file=random_header_image,
             embed=reportembed,
         )
-        await interaction.ed
+
         await interaction.response.send_message(
             (f"Check {channel.mention}\nYour report has been submitted. Salute!"),
             ephemeral=True,
         )
+        await self.message.edit(view=self)
+        print("submit disable funct reached")
 
     @discord.ui.select(
         options=[
@@ -387,7 +393,7 @@ class ReportCog(commands.Cog):
             channel = ctx.guild.get_channel(D_REPORT_CHAN_ID)
 
         view = PersistentView()
-        await channel.send(
+        message = await channel.send(
             """To report a contribution, please:\n
 ✅ `PICK THE CORRESPONDING GUILD, EFFORT AND PROJECTED IMPACT`
 📜 `ADD A DESCRIPTION`
@@ -395,6 +401,7 @@ class ReportCog(commands.Cog):
             """,
             view=view,
         )
+        view.message = message
 
 
 async def setup(bot):
