@@ -7,14 +7,15 @@ from settings import (
     TESTCOGS_DIR,
     COGS_DIR,
     CMDS_DIR,
+    CUSTOM_CLASSES_DIR,
 )
 import settings
+import asyncio
 import database
 import peewee
 from models.guild import Guild
 
 import time
-import asyncio
 from colorama import Fore, Back, Style
 
 from custom_classes.reportmenu import PersistentView
@@ -32,33 +33,27 @@ tprfx = (
 )
 
 
-def run():
-
-    if not database.mgdb.table_exists(table_name="guild"):
-        database.mgdb.create_tables([Guild])
-        print(f"{tprfx}Database created")
-    else:
+def fetch_prefix(bot, message):
+    if message:
         try:
-            guild = Guild.get(Guild.server_id == D_GUILD_ID)
+            guild = Guild.get(Guild.server_id == message.guild.id)
             prefix = guild.server_prefix
-            print(
-                f"{tprfx}\t\tGuild found and prefix set to '{Fore.YELLOW}{prefix}{Style.RESET_ALL}'"
-            )
+            return [str(prefix)]
         except peewee.DoesNotExist:
-            guild = Guild.create(server_prefix="!", server_id=D_GUILD_ID)
+            guild = Guild.create(server_prefix="!", server_id=message.guild.id)
             prefix = guild.server_prefix
-            print(
-                f"{tprfx}\t\tGuild table created and prefix set to default: '{Fore.YELLOW}!{Style.RESET_ALL}'"
-            )
+            return [str(prefix)]
+    return "!"
 
+
+def run():
     class PrometheusBot(commands.Bot):
         def __init__(self) -> None:
             intents = discord.Intents.default()
             intents.message_content = True
             intents.members = True
-            super().__init__(
-                command_prefix=commands.when_mentioned_or(prefix), intents=intents
-            )
+            intents.guilds = True
+            super().__init__(command_prefix=fetch_prefix, intents=intents)
 
         async def setup_hook(self) -> None:
             self.add_view(PersistentView())
@@ -67,6 +62,7 @@ def run():
             print(f"{tprfx}\t\tLogged in as {Fore.CYAN}{bot.user.name}")
             print(f"{tprfx}\t\tBOT ID {Fore.YELLOW}{bot.user.id}")
             print("--------------------------------------------")
+            await self.fetch_guilds()
 
             for cmd_file in CMDS_DIR.glob("*.py"):
                 if cmd_file.name != "__init__.py":
@@ -82,6 +78,19 @@ def run():
                         end="",
                     )
                     print(f"{f' {cog_file.name[:-3]}'}")
+            # await bot.tree.sync()  # guild=discord.Object(id=D_GUILD_ID)
+            print(f"{tprfx}\t\tCOGS SYNCED")
+
+            for class_file in CUSTOM_CLASSES_DIR.glob("*.py"):
+                if class_file.name != "__init__.py":
+                    await bot.load_extension(f"custom_classes.{class_file.name[:-3]}")
+                    print(
+                        (f"{tprfx}\t\tEXTENSION LOADED:"),
+                        end="",
+                    )
+                    print(f"{f' {class_file.name[:-3]}'}")
+            # await bot.tree.sync()  # guild=discord.Object(id=D_GUILD_ID)
+            print(f"{tprfx}\t\tCUSTOM CLASSES SYNCED")
 
             for testcog_file in TESTCOGS_DIR.glob("*.py"):
                 if testcog_file.name != "__init__.py":
@@ -92,23 +101,47 @@ def run():
                     )
                     print(f"{f' {testcog_file.name[:-3]}'}")
 
-            await bot.tree.sync(guild=discord.Object(id=D_GUILD_ID))
+        async def fetch_guilds(self):
+            if not database.mgdb.table_exists(table_name="guild"):
+                database.mgdb.create_tables([Guild])
+                print(f"{tprfx}Database created")
+            else:
+                guild_list = [
+                    (guild.server_id, guild.server_prefix)
+                    for guild in Guild.select(Guild.server_id, Guild.server_prefix)
+                ]
+
+                print(f"{tprfx}\t\tDatabase found.")
+                print(f"{tprfx}\t\t{guild_list}")
+                print()
 
     bot = PrometheusBot()
 
-    @bot.command()
-    async def prepare(ctx: commands.Context, channel: discord.TextChannel = None):
-        if channel is None:
-            channel = ctx.guild.get_channel(D_REPORT_CHAN_ID)
+    @bot.event
+    async def on_guild_join(guild):
+        print(f"{tprfx}\t\tPrometheus was added to a server: {guild.name}")
+        try:
+            guild = Guild.get(Guild.server_id == guild.id)
+            print(f"{tprfx}\t\tGuild already present. Continuing..")
 
-        await channel.send(
-            """To report a contribution, please:\n
-✅ `PICK THE CORRESPONDING GUILD, EFFORT AND PROJECTED IMPACT`
-📜 `ADD A DESCRIPTION`
-🔺 `CLICK SUBMIT WHEN READY`
-            """,
-            view=PersistentView(),
-        )
+        except peewee.DoesNotExist:
+            guild = Guild.create(server_prefix="!", server_id=guild.id)
+            print(f"{tprfx}\t\tDatabase entry created with default prefix '!' ")
+
+    @bot.event
+    async def on_guild_remove(guild):
+        print(f"{tprfx}\t\tPrometheus was removed from a server: {guild.name}")
+        guild = Guild.get(Guild.server_id == guild.id)
+        guild.delete_instance()
+        print(f"{tprfx}\t\tDatabase entry removed succesful.")
+
+    @bot.command()
+    async def set_prefix(ctx: commands.Context, new_prefix: str):
+        guild = Guild.get(Guild.server_id == ctx.message.guild.id)
+        guild.server_prefix = str(new_prefix)
+        guild.save()
+        print(f"guild {ctx.message.guild.id} updated with prefix {new_prefix}")
+        await ctx.send(f"`PREFIX UPDATED` New prefix set to {new_prefix}")
 
     @bot.command()
     async def loadcog(ctx, cog: str):
@@ -125,6 +158,23 @@ def run():
             print(
                 f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
         {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to load >>{Fore.CYAN}{ctx.message.content[6:]}{Fore.YELLOW}<< . Check if spelled correctly"
+            )
+
+    @bot.command()
+    async def loadclass(ctx, custom_classes: str):
+        try:
+            await bot.load_extension(f"custom_classes.{custom_classes.lower()}")
+            await ctx.send(f"`{custom_classes} MATRIX HAS BEEN LOADED`")
+            print(
+                f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
+        {Style.BRIGHT}{Fore.GREEN}USER {Back.BLACK}{Fore.CYAN}{ctx.author}{Fore.GREEN} loaded >>{Fore.CYAN}{custom_classes.lower()}{Fore.GREEN}<< successfully!"
+            )
+
+        except Exception as e:
+            await ctx.send(f"`{custom_classes} MATRIX HAS FAILED TO LOAD`")
+            print(
+                f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
+        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to load >>{Fore.CYAN}{ctx.message.content[11:]}{Fore.YELLOW}<< . Check if spelled correctly"
             )
 
     @bot.command()

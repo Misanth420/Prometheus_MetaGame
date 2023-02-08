@@ -79,6 +79,13 @@ class PersistentView(discord.ui.View):
     desc = None
     art = None
 
+    foo: bool = None
+
+    # async def enable_submit_button():
+    #     for item in PersistentView.children:
+    #         item.disable = False
+    #     await message.edit(view=PersistentView)
+
     @discord.ui.button(
         label="add description",
         style=discord.ButtonStyle.blurple,
@@ -166,12 +173,14 @@ class PersistentView(discord.ui.View):
         emoji="🔺",
         custom_id="report_view:submit_button",
         row=4,
+        disabled=True,
     )
     async def button1callback(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
         button.style = (discord.ButtonStyle.green,)
-        button.label = "submit report"
+        button.label = ("Submit Report",)
+        button.disabled = (False,)
 
         reportembed = discord.Embed(
             colour=discord.Colour.magenta(),
@@ -224,6 +233,7 @@ class PersistentView(discord.ui.View):
             file=random_header_image,
             embed=reportembed,
         )
+        await interaction.ed
         await interaction.response.send_message(
             (f"Check {channel.mention}\nYour report has been submitted. Salute!"),
             ephemeral=True,
@@ -358,6 +368,8 @@ class PersistentView(discord.ui.View):
         self.artefactreply = artefact_output
         self.guild = guild
 
+        self.foo = True
+
         logger.info(
             f"User {interaction.user.name} is submitting description: {self.descriptionreply} and artefact: {self.artefactreply}. Extra: {self.guild}"
         )
@@ -368,6 +380,21 @@ class PersistentView(discord.ui.View):
 class ReportCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    async def prepare(self, ctx: commands.Context, channel: discord.TextChannel = None):
+        if channel is None:
+            channel = ctx.guild.get_channel(D_REPORT_CHAN_ID)
+
+        view = PersistentView()
+        await channel.send(
+            """To report a contribution, please:\n
+✅ `PICK THE CORRESPONDING GUILD, EFFORT AND PROJECTED IMPACT`
+📜 `ADD A DESCRIPTION`
+🔺 `CLICK SUBMIT WHEN READY`
+            """,
+            view=view,
+        )
 
 
 async def setup(bot):
