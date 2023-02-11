@@ -15,6 +15,7 @@ import database
 import peewee
 from models.guild import Guild
 
+
 import time
 from colorama import Fore, Back, Style
 
@@ -37,11 +38,15 @@ def fetch_prefix(bot, message):
     if message:
         try:
             guild = Guild.get(Guild.server_id == message.guild.id)
+            # guild_id = guild.server_id
             prefix = guild.server_prefix
+            # print(f"guild {guild_id} found with prefix {prefix}")
             return [str(prefix)]
         except peewee.DoesNotExist:
-            guild = Guild.create(server_prefix="!", server_id=message.guild.id)
+            guild = Guild.create(server_id=message.guild.id, server_prefix="!")
+            # guild_id = guild.server_id
             prefix = guild.server_prefix
+            # print(f"guild {guild_id} added with prefix {prefix}")
             return [str(prefix)]
     return "!"
 
@@ -189,7 +194,7 @@ def run():
             await ctx.send(f"`{cog} MATRIX FAILED TO RELOAD`")
             print(
                 f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to reload >>{Fore.CYAN}{ctx.message.content[8:]}{Fore.YELLOW}<< . Check if spelled correctly"
+        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to reload >>{Fore.CYAN}{ctx.message.content[11:]}{Fore.YELLOW}<< . Check if spelled correctly"
             )
 
     @bot.command()
@@ -228,17 +233,17 @@ def run():
     async def reloadclass(ctx, custom_classes: str):
         try:
             await bot.reload_extension(f"custom_classes.{custom_classes.lower()}")
-            await ctx.send(f"`{custom_classes} MATRIX HAS BEEN LOADED`")
+            await ctx.send(f"`{custom_classes} MATRIX HAS BEEN RELOADED`")
             print(
                 f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Fore.GREEN}USER {Back.BLACK}{Fore.CYAN}{ctx.author}{Fore.GREEN} loaded >>{Fore.CYAN}{custom_classes.lower()}{Fore.GREEN}<< successfully!"
+        {Style.BRIGHT}{Fore.GREEN}USER {Back.BLACK}{Fore.CYAN}{ctx.author}{Fore.GREEN} reloaded >>{Fore.CYAN}{custom_classes.lower()}{Fore.GREEN}<< successfully!"
             )
 
         except Exception as e:
             await ctx.send(f"`{custom_classes} MATRIX HAS FAILED TO LOAD`")
             print(
                 f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to load >>{Fore.CYAN}{ctx.message.content[11:]}{Fore.YELLOW}<< . Check if spelled correctly"
+        {Style.BRIGHT}{Back.BLACK}{Fore.YELLOW}USER {Fore.CYAN}{ctx.author}{Fore.YELLOW} failed to load >>{Fore.CYAN}{ctx.message.content[13:]}{Fore.YELLOW}<< . Check if spelled correctly"
             )
 
     bot.run(DISCORD_API_SECRET)

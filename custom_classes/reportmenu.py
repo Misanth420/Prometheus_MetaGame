@@ -6,6 +6,12 @@ import settings
 import pathlib
 import random
 
+import peewee
+import database
+from models.report import Report
+from models.msgpersist import PersMessage
+from models.guild import Guild
+
 import datetime
 from colorama import Fore, Back, Style
 
@@ -81,10 +87,17 @@ class PersistentView(discord.ui.View):
 
     foo: bool = None
 
-    async def enable_submit_button(self):
+    async def enable_submit_button(self, interaction: discord.Interaction):
         for item in self.children:
             item.disabled = False
-        await self.message.edit(view=self)
+        pmessage = PersMessage.get(
+            PersMessage.purpose == "reportmenu",
+            PersMessage.discord_server == interaction.guild.id,
+        )
+        msgid = int(pmessage.message_id)
+        channel = interaction.channel
+        message = await channel.fetch_message(msgid)
+        await message.edit(view=self)
         print("view edit reached")
 
     async def on_timeout(self) -> None:
@@ -163,14 +176,14 @@ class PersistentView(discord.ui.View):
         )
         await interaction.followup.send(
             (
-                f"This is a preview of the report you're about to submit.\
-        \n**Please click** `🔺SUBMIT REPORT` **if happy**"
+                f"**This is a preview of the report you're about to submit.**\
+\n\n**Please click the** ` 🔺SUBMIT REPORT ` **button above to report if happy.**"
             ),
             file=random_header_image,
             embed=reportembed,
             ephemeral=True,
         )
-        await self.enable_submit_button()
+        await self.enable_submit_button(interaction)
 
     @discord.ui.button(
         label="Submit Report",
@@ -242,7 +255,14 @@ class PersistentView(discord.ui.View):
             (f"Check {channel.mention}\nYour report has been submitted. Salute!"),
             ephemeral=True,
         )
-        await self.message.edit(view=self)
+        pmessage = PersMessage.get(
+            PersMessage.purpose == "reportmenu",
+            PersMessage.discord_server == interaction.guild.id,
+        )
+        msgid = int(pmessage.message_id)
+        channel = interaction.channel
+        message = await channel.fetch_message(msgid)
+        await message.edit(view=self)
         print("submit disable funct reached")
 
     @discord.ui.select(
@@ -402,6 +422,28 @@ class ReportCog(commands.Cog):
             view=view,
         )
         view.message = message
+        await self.store_message(ctx, message, channel)
+
+    async def store_message(self, ctx, message, channel):
+        if not database.mgdb.table_exists(table_name="persmessage"):
+            database.mgdb.create_tables([PersMessage])
+        try:
+            pmessage = PersMessage.get(
+                PersMessage.purpose == "reportmenu",
+                PersMessage.discord_server == ctx.guild.id,
+            )
+            pmessage.message_id = int(message.id)
+            pmessage.channel_id = int(channel.id)
+            pmessage.save()
+            print("message id updated")
+        except peewee.DoesNotExist:
+            pmessage = PersMessage.create(
+                discord_server=ctx.guild.id,
+                purpose="reportmenu",
+                channel_id=channel.id,
+                message_id=message.id,
+            )
+            print("message id added to db")
 
 
 async def setup(bot):
