@@ -127,7 +127,7 @@ class PersistentView(discord.ui.View):
         self.desc = report_modal.description
         self.art = report_modal.artefact
         print(
-            f"button2 callback(report modal button): {report_modal.description}, {report_modal.artefact}, {self.guild}, {self.effort}, {self.impact}"
+            f"add description callback: {report_modal.description}, {report_modal.artefact}, {self.guild}, {self.effort}, {self.impact}"
         )
 
         reportembed = discord.Embed(
@@ -263,7 +263,36 @@ class PersistentView(discord.ui.View):
         channel = interaction.channel
         message = await channel.fetch_message(msgid)
         await message.edit(view=self)
-        print("submit disable funct reached")
+
+        modal_description = self.desc
+        modal_artefact = self.art
+        await self.store_report(
+            interaction, cguild, ceffort, cimpact, modal_description, modal_artefact
+        )
+
+    async def store_report(
+        self, interaction, cguild, ceffort, cimpact, modal_description, modal_artefact
+    ):
+        if not database.mgdb.table_exists(table_name="report"):
+            database.mgdb.create_tables([Report])
+        try:
+            utc_time = datetime.datetime.utcnow()
+            print(utc_time)
+            formatted_time = utc_time.strftime("%Y-%m-%d %H:%M:%S") + " UTC"
+            print(formatted_time)
+            report = Report.create(
+                user_discord_id=interaction.user.id,
+                server=interaction.guild.id,
+                guildbanner=cguild,
+                effort=ceffort,
+                impact=cimpact,
+                description=modal_description,
+                artefact=modal_artefact,
+                date=formatted_time,
+            )
+            print("report added")
+        except Exception as e:
+            print(e)
 
     @discord.ui.select(
         options=[
