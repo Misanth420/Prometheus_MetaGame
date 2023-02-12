@@ -83,7 +83,7 @@ def run():
                         end="",
                     )
                     print(f"{f' {cog_file.name[:-3]}'}")
-            # await bot.tree.sync()  # guild=discord.Object(id=D_GUILD_ID)
+            await bot.tree.sync()  # guild=discord.Object(id=D_GUILD_ID)
             print(f"{tprfx}\t\tCOGS SYNCED")
 
             for class_file in CUSTOM_CLASSES_DIR.glob("*.py"):

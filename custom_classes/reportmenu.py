@@ -277,9 +277,7 @@ class PersistentView(discord.ui.View):
             database.mgdb.create_tables([Report])
         try:
             utc_time = datetime.datetime.utcnow()
-            print(utc_time)
-            formatted_time = utc_time.strftime("%Y-%m-%d %H:%M:%S") + " UTC"
-            print(formatted_time)
+            # formatted_time = utc_time.strftime("%Y-%m-%d %H:%M:%S") + " UTC"
             report = Report.create(
                 user_discord_id=interaction.user.id,
                 server=interaction.guild.id,
@@ -288,7 +286,7 @@ class PersistentView(discord.ui.View):
                 impact=cimpact,
                 description=modal_description,
                 artefact=modal_artefact,
-                date=formatted_time,
+                date=utc_time,
             )
             print("report added")
         except Exception as e:
