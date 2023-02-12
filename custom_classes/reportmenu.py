@@ -11,6 +11,7 @@ import database
 from models.report import Report
 from models.msgpersist import PersMessage
 from models.guild import Guild
+from models.schannel import SChannel
 
 import datetime
 from colorama import Fore, Back, Style
@@ -56,7 +57,8 @@ class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
             )
             print(
                 f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{description_output}, {artefact_output} | {Style.RESET_ALL} {Fore.CYAN}by {interaction.user}"
+        {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{description_output}, {artefact_output}\
+             | {Style.RESET_ALL} {Fore.CYAN}by {interaction.user}{Style.RESET_ALL}"
             )
 
             self.stop()
@@ -66,9 +68,7 @@ class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
             logger.exception("An exception occurred")
 
     async def on_error(self, interaction: discord.Interaction, error):
-        await interaction.response.send_message(
-            "Something went wrong. Modal NOT submitted."
-        )
+        await interaction.response.send_message("Something went wrong. Modal NOT submitted.")
         print(
             f"{Style.BRIGHT}{Back.RED}{Fore.BLACK}ERROR:{Style.RESET_ALL}\
             {Style.BRIGHT}{Back.BLACK}{Fore.RED}failed to submit modal."
@@ -98,7 +98,6 @@ class PersistentView(discord.ui.View):
         channel = interaction.channel
         message = await channel.fetch_message(msgid)
         await message.edit(view=self)
-        print("view edit reached")
 
     async def on_timeout(self) -> None:
         await self.enable_submit_button()
@@ -110,9 +109,7 @@ class PersistentView(discord.ui.View):
         custom_id="report_view:modal_button",
         row=4,
     )
-    async def add_desc_callback(
-        self, interaction: discord.Interaction, button: discord.ui.Button
-    ):
+    async def add_desc_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
 
         report_modal = ReportModal(timeout=None)
         report_modal.user = interaction.user
@@ -126,9 +123,6 @@ class PersistentView(discord.ui.View):
         await report_modal.wait()
         self.desc = report_modal.description
         self.art = report_modal.artefact
-        print(
-            f"add description callback: {report_modal.description}, {report_modal.artefact}, {self.guild}, {self.effort}, {self.impact}"
-        )
 
         reportembed = discord.Embed(
             colour=discord.Colour.magenta(),
@@ -148,21 +142,15 @@ class PersistentView(discord.ui.View):
         cimpact = str(impact)[1:-1]
 
         random_header_path = get_random_header()
-        random_header_image = discord.File(
-            random_header_path, filename=random_header_path.name
-        )
+        random_header_image = discord.File(random_header_path, filename=random_header_path.name)
 
         reportembed.set_footer(text="Scorched document found")
         reportembed.set_author(name="A PLAYER")
 
         reportembed.set_image(url=(f"attachment://{random_header_path.name}"))
         reportembed.insert_field_at(0, name="GUILD BANNER", value=cguild, inline=True)
-        reportembed.insert_field_at(
-            0, name="EFFORT INVESTED", value=ceffort, inline=True
-        )
-        reportembed.insert_field_at(
-            0, name="PROJECTED IMPACT", value=cimpact, inline=True
-        )
+        reportembed.insert_field_at(0, name="EFFORT INVESTED", value=ceffort, inline=True)
+        reportembed.insert_field_at(0, name="PROJECTED IMPACT", value=cimpact, inline=True)
         reportembed.insert_field_at(
             3,
             name="",
@@ -217,21 +205,15 @@ class PersistentView(discord.ui.View):
         cimpact = str(impact)[1:-1]
 
         random_header_path = get_random_header()
-        random_header_image = discord.File(
-            random_header_path, filename=random_header_path.name
-        )
+        random_header_image = discord.File(random_header_path, filename=random_header_path.name)
         # reportembed = discord.Embed()
         reportembed.set_footer(text="Scorched document found")
         reportembed.set_author(name="A PLAYER")
 
         reportembed.set_image(url=(f"attachment://{random_header_path.name}"))
         reportembed.insert_field_at(0, name="GUILD BANNER", value=cguild, inline=True)
-        reportembed.insert_field_at(
-            0, name="EFFORT INVESTED", value=ceffort, inline=True
-        )
-        reportembed.insert_field_at(
-            0, name="PROJECTED IMPACT", value=cimpact, inline=True
-        )
+        reportembed.insert_field_at(0, name="EFFORT INVESTED", value=ceffort, inline=True)
+        reportembed.insert_field_at(0, name="PROJECTED IMPACT", value=cimpact, inline=True)
         reportembed.insert_field_at(
             3,
             name="",
@@ -240,11 +222,14 @@ class PersistentView(discord.ui.View):
             \n**{interaction.user.name}**, Bane of Sugar Plums"
             ),
         )
-        reportembed.insert_field_at(
-            4, name="Artefact", value=f"{self.art}", inline=False
-        )
+        reportembed.insert_field_at(4, name="Artefact", value=f"{self.art}", inline=False)
 
-        channel = interaction.guild.get_channel(D_REPORT_CHAN_ID)
+        chnl = SChannel.get(
+            SChannel.discord_server == interaction.guild.id, SChannel.purpose == "giveprops"
+        )
+        chnl_id = int(chnl.channel_id)
+        channel = interaction.guild.get_channel(chnl_id)
+
         await channel.send(
             f"{interaction.user.mention} found a scorched document!",
             file=random_header_image,

@@ -20,16 +20,16 @@ class FetchDataCog(commands.Cog):
             day_ago = now - datetime.timedelta(days=1)
             week_ago = now - datetime.timedelta(days=7)
             month_ago = now - datetime.timedelta(days=30)
-            day_report = Report.select().where(Report.date >= day_ago)
-            week_report = Report.select().where(Report.date >= week_ago)
-            month_report = Report.select().where(Report.date >= month_ago)
-            total_report = Report.select().where(Report.server == ctx.guild.id)
+            day_report = report.select().where(Report.date >= day_ago)
+            week_report = report.select().where(Report.date >= week_ago)
+            month_report = report.select().where(Report.date >= month_ago)
+            total_report = report.select().where(Report.server == ctx.guild.id)
 
-            art_report = Report.select().where(Report.guildbanner == "Art and Design")
-            buidl_report = Report.select().where(Report.guildbanner == "Building")
-            bridgebuidl_report = Report.select().where(Report.guildbanner == "BridgeBuilding")
-            innkeep_report = Report.select().where(Report.guildbanner == "Innkeeping")
-            shill_report = Report.select().where(Report.guildbanner == "Shilling and Rainmaking")
+            art_report = report.select().where(Report.guildbanner == "Art and Design")
+            buidl_report = report.select().where(Report.guildbanner == "Building")
+            bridgebuidl_report = report.select().where(Report.guildbanner == "BridgeBuilding")
+            innkeep_report = report.select().where(Report.guildbanner == "Innkeeping")
+            shill_report = report.select().where(Report.guildbanner == "Shilling and Rainmaking")
 
             num_day = day_report.count()
             num_week = week_report.count()
@@ -68,7 +68,6 @@ class FetchDataCog(commands.Cog):
                 value=f"There are a total of ` {num_month} report(s) ` in the past 30 days",
                 inline=False,
             )
-            embed.add_field
 
             await ctx.send(embed=embed)
         else:
