@@ -14,6 +14,7 @@ from models.guild import Guild
 from models.schannel import SChannel
 
 import datetime
+import asyncio
 from colorama import Fore, Back, Style
 
 logger = settings.logging.getLogger("bot")
@@ -53,13 +54,15 @@ class ReportModal(discord.ui.Modal, title="Sup, what you've been up to?"):
 
             print(
                 f"{Style.BRIGHT}{Back.GREEN}{Fore.BLACK}PASSED:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Back.CYAN}{Fore.BLACK}user submitted a modal successfully"
+        {Style.BRIGHT}{Back.CYAN}{Fore.BLACK}user submitted a modal successfully\
+            {Style.RESET_ALL}"
             )
             print(
                 f"{Style.BRIGHT}{Back.MAGENTA}{Fore.BLACK}DATA PASSED:{Style.RESET_ALL}\
-        {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{description_output}, {artefact_output}\
-             | {Style.RESET_ALL} {Fore.CYAN}by {interaction.user}{Style.RESET_ALL}"
+    {Style.BRIGHT}{Back.BLACK}{Fore.MAGENTA}{description_output}, {artefact_output}\
+     | {Style.RESET_ALL} {Fore.CYAN}by {interaction.user} {Style.RESET_ALL}{Back.BLACK}"
             )
+            print()
 
             self.stop()
 
@@ -102,6 +105,21 @@ class PersistentView(discord.ui.View):
     async def on_timeout(self) -> None:
         await self.enable_submit_button()
 
+    async def reset_view(self, interaction: discord.Interaction):
+        for item in self.children:
+            item.disabled = False
+        self.children[1].disabled = True
+        self.children[0].description = "add description"
+
+        pmessage = PersMessage.get(
+            PersMessage.purpose == "reportmenu",
+            PersMessage.discord_server == interaction.guild.id,
+        )
+        msgid = int(pmessage.message_id)
+        channel = interaction.channel
+        message = await channel.fetch_message(msgid)
+        await message.edit(view=self)
+
     @discord.ui.button(
         label="add description",
         style=discord.ButtonStyle.blurple,
@@ -110,7 +128,8 @@ class PersistentView(discord.ui.View):
         row=4,
     )
     async def add_desc_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-
+        button.style = discord.ButtonStyle.green
+        button.label = "description added!"
         report_modal = ReportModal(timeout=None)
         report_modal.user = interaction.user
 
@@ -172,6 +191,24 @@ class PersistentView(discord.ui.View):
             ephemeral=True,
         )
         await self.enable_submit_button(interaction)
+        await asyncio.sleep(45)
+        await self.add_desc_timeout(interaction, button)
+        await self.reset_view(interaction)
+        print("view reset")
+
+    async def add_desc_timeout(self, interaction: discord.Interaction, button: discord.ui.Button):
+
+        button.style = discord.ButtonStyle.blurple
+        button.label = "add description"
+
+        pmessage = PersMessage.get(
+            PersMessage.purpose == "reportmenu",
+            PersMessage.discord_server == interaction.guild.id,
+        )
+        msgid = int(pmessage.message_id)
+        channel = interaction.channel
+        message = await channel.fetch_message(msgid)
+        await message.edit(view=self)
 
     @discord.ui.button(
         label="Submit Report",
@@ -254,6 +291,7 @@ class PersistentView(discord.ui.View):
         await self.store_report(
             interaction, cguild, ceffort, cimpact, modal_description, modal_artefact
         )
+        await self.reset_view(interaction)
 
     async def store_report(
         self, interaction, cguild, ceffort, cimpact, modal_description, modal_artefact
@@ -381,7 +419,7 @@ class PersistentView(discord.ui.View):
             discord.SelectOption(
                 label="Low Impact",
                 emoji="1️⃣",
-                description="Low impact. Simple contribution. EZ",
+                description="Low impact. Simple contribution.",
             ),
         ],
         placeholder="Projected Impact",
