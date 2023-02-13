@@ -15,6 +15,7 @@ async def set_channel(ctx):
 async def channel(ctx, channel: discord.TextChannel, purpose: str):
     if not database.mgdb.table_exists(table_name="schannel"):
         database.mgdb.create_tables([SChannel])
+
     try:
         schannel = SChannel.get(
             SChannel.discord_server == ctx.guild.id, SChannel.purpose == purpose

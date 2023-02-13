@@ -12,6 +12,7 @@ from models.report import Report
 from models.msgpersist import PersMessage
 from models.guild import Guild
 from models.schannel import SChannel
+from utils.lexicon import titles, descriptions
 
 import datetime
 import asyncio
@@ -132,6 +133,8 @@ class PersistentView(discord.ui.View):
         button.label = "description added!"
         report_modal = ReportModal(timeout=None)
         report_modal.user = interaction.user
+        random_title = random.choice(titles)
+        random_desc = random.choice(descriptions)
 
         await interaction.response.send_modal(report_modal)
         print(
@@ -145,10 +148,7 @@ class PersistentView(discord.ui.View):
 
         reportembed = discord.Embed(
             colour=discord.Colour.magenta(),
-            description=(
-                f"On the battlefield, a strange schorched document is seen\
-        pinned on a spear, begging to be torn...It reads:"
-            ),
+            description=(f"{random_desc}"),
             title="has slain an enemy!",
             timestamp=datetime.datetime.now(),
             # time=datetime.datetime.utcnow().strftime("%Y-%d-%m %H:%M:%S %Z")
@@ -159,7 +159,6 @@ class PersistentView(discord.ui.View):
         cguild = str(guild)[1:-1]
         ceffort = str(effort)[1:-1]
         cimpact = str(impact)[1:-1]
-
         random_header_path = get_random_header()
         random_header_image = discord.File(random_header_path, filename=random_header_path.name)
 
@@ -175,7 +174,7 @@ class PersistentView(discord.ui.View):
             name="",
             value=(
                 f"[...]\n`..{report_modal.description}`\
-            \n**{interaction.user.name}**, Bane of Sugar Plums"
+            \n**{interaction.user.name}**, {random_title}"
             ),
         )
         reportembed.insert_field_at(
@@ -191,7 +190,7 @@ class PersistentView(discord.ui.View):
             ephemeral=True,
         )
         await self.enable_submit_button(interaction)
-        await asyncio.sleep(45)
+        await asyncio.sleep(20)
         await self.add_desc_timeout(interaction, button)
         await self.reset_view(interaction)
         print("view reset")
@@ -221,15 +220,14 @@ class PersistentView(discord.ui.View):
     async def submit_report_callback(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        random_title = random.choice(titles)
+        random_desc = random.choice(descriptions)
 
         button.disabled = True
 
         reportembed = discord.Embed(
             colour=discord.Colour.magenta(),
-            description=(
-                f"On the battlefield, a strange schorched document is seen\
-        pinned on a spear, begging to be torn...It reads:"
-            ),
+            description=(f"{random_desc}"),
             title="has slain an enemy!",
             timestamp=datetime.datetime.now(),
             # time=datetime.datetime.utcnow().strftime("%Y-%d-%m %H:%M:%S %Z")
@@ -246,7 +244,6 @@ class PersistentView(discord.ui.View):
         # reportembed = discord.Embed()
         reportembed.set_footer(text="Scorched document found")
         reportembed.set_author(name="A PLAYER")
-
         reportembed.set_image(url=(f"attachment://{random_header_path.name}"))
         reportembed.insert_field_at(0, name="GUILD BANNER", value=cguild, inline=True)
         reportembed.insert_field_at(0, name="EFFORT INVESTED", value=ceffort, inline=True)
@@ -256,7 +253,7 @@ class PersistentView(discord.ui.View):
             name="",
             value=(
                 f"[...]\n`..{self.desc}`\
-            \n**{interaction.user.name}**, Bane of Sugar Plums"
+            \n**{interaction.user.name}**, {random_title}"
             ),
         )
         reportembed.insert_field_at(4, name="Artefact", value=f"{self.art}", inline=False)
