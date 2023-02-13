@@ -11,9 +11,7 @@ class TimeoutCog(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command()
-    async def timeoutpoll(
-        self, ctx, offender: discord.Member, timeout_time, *, description: str
-    ):
+    async def timeoutpoll(self, ctx, offender: discord.Member, timeout_time, *, description: str):
 
         role = discord.utils.get(ctx.guild.roles, name=settings.D_TIMEOUT_USE_ROLE)
         if role not in ctx.author.roles:
@@ -110,28 +108,18 @@ class TimeoutCog(commands.Cog):
 
         await asyncio.sleep(poll_duration_sleep)
         message = await ctx.channel.fetch_message(message.id)
-        await self.timeout(
-            ctx, message, offender, emoji_count, timeout_time, duration_seconds
-        )
+        await self.timeout(ctx, message, offender, emoji_count, timeout_time, duration_seconds)
 
-    async def timeout(
-        self, ctx, message, offender, emoji_count, timeout_time, duration_seconds
-    ):
-        thumbs_up = (
-            message.reactions[0].count - 1
-        )  # first is expected to be (thumbs up)
-        thumbs_down = (
-            message.reactions[1].count - 1
-        )  # second is expected to be (thumbs down)
+    async def timeout(self, ctx, message, offender, emoji_count, timeout_time, duration_seconds):
+        thumbs_up = message.reactions[0].count - 1  # first is expected to be (thumbs up)
+        thumbs_down = message.reactions[1].count - 1  # second is expected to be (thumbs down)
         member = offender
 
         # 120 mins 48 hours 28 days,
         if thumbs_up >= emoji_count and thumbs_up > thumbs_down:
             if duration_seconds < 7200:  # 120 minutes
                 adjusted_time = datetime.timedelta(minutes=int(duration_seconds / 60))
-                await member.edit(
-                    timed_out_until=discord.utils.utcnow() + adjusted_time
-                )
+                await member.edit(timed_out_until=discord.utils.utcnow() + adjusted_time)
                 await ctx.send(
                     f"**{message.author.name}** _casts_ `🥶Frostbolt🥶`!\
                     \n\n`🥶Frostbolt🥶` _hits_ **_{member.name}_** _for_ `9000`!\
@@ -140,9 +128,7 @@ class TimeoutCog(commands.Cog):
 
             elif duration_seconds >= 7200 and duration_seconds < 172800:
                 adjusted_time = datetime.timedelta(hours=int(duration_seconds * 3600))
-                await member.edit(
-                    timed_out_until=discord.utils.utcnow() + adjusted_time
-                )
+                await member.edit(timed_out_until=discord.utils.utcnow() + adjusted_time)
                 await ctx.send(
                     f"**{message.author.name}** _casts_ `🧊🌟**Frost Nova**🌟🧊`!\
                     \n\n`🧊🌟Frost Nova🌟🧊` _hits_ **_{member.name}_** _for_ `9000`!\
@@ -151,9 +137,7 @@ class TimeoutCog(commands.Cog):
 
             elif duration_seconds > 172800:
                 adjusted_time = datetime.timedelta(days=int(duration_seconds * 86400))
-                await member.edit(
-                    timed_out_until=discord.utils.utcnow() + adjusted_time
-                )
+                await member.edit(timed_out_until=discord.utils.utcnow() + adjusted_time)
                 await ctx.send(
                     f"**{message.author.name}** _casts_ 🧊🔥**Frostfire Bolt**🔥🧊!\
                     \n\n`🧊🔥Frostfire Bolt🔥🧊` _hits_ **_{member.name}_** _for_ `9000!`\
