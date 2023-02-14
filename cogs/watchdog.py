@@ -14,6 +14,55 @@ class GuardianCog(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
+    async def on_member_ban(self, guild, user):
+        chnl = SChannel.get(SChannel.discord_server == user.guild.id, SChannel.purpose == "voting")
+        channel = self.bot.get_channel(int(chnl.channel_id))
+        duration = 86400  # day
+        emoji_count = 8
+
+        async for entry in guild.audit_logs(action=discord.AuditLogAction.ban, limit=1):
+
+            print(f"{entry.user} banned {entry.target} | {entry.action} |  | {entry.reason}")
+            reason = entry.reason
+            mod = entry.user
+
+        embed = discord.Embed(
+            title="Poll",
+            description=f"Player {user.mention} got permabanned because:\
+            \n{reason}\n\n**Should we unban them**?",
+        )
+        embed.set_footer(text=f"Banhammer originally wielded by {mod}")
+        message = await channel.send(embed=embed)
+        await message.add_reaction("👍")
+        await message.add_reaction("👎")
+        await channel.send(
+            f"```THE POLL WILL LAST: ⏲️ {duration/60/60} hours  ⏲️\
+                \nREACTIONS REQUIRED: 👍 {emoji_count} 👍\
+                \n\nPlease vote by signaling with:\
+                \n👍(thumbs up) if you AGREE or\
+                \n(thumbs down)👎 if you DISAGREE.```"
+        )
+        await asyncio.sleep(duration)
+        message = await channel.fetch_message(message.id)
+        await self.timeout(message, user, guild, emoji_count, channel)
+
+    async def timeout(
+        self, message, user: discord.Member, guild, emoji_count, channel: discord.TextChannel
+    ):
+        thumbs_up = message.reactions[0].count - 1
+        thumbs_down = message.reactions[1].count - 1
+
+        if thumbs_up >= emoji_count and thumbs_up > thumbs_down:
+            await guild.unban(user)
+
+        else:
+            await channel.send(
+                f"` VOTE FAILED `: **Voting conditions not met.\
+            \nExpected more than ` {emoji_count} 👍 ` but got ` {thumbs_up} 👍 `\
+            \n** _Revolution ain't so easy._ **🏳️🏳️🏳️**"
+            )
+
+    @commands.Cog.listener()
     async def on_member_update(self, before, after):
         check_time = datetime.timedelta(seconds=int(5))
         naive_now = datetime.datetime.utcnow() + check_time
@@ -46,13 +95,8 @@ class GuardianCog(commands.Cog):
         channel = self.bot.get_channel(int(chnl.channel_id))
         guild = discord.Guild
         atime = datetime.timedelta(seconds=int(1))
-        # await channel.send(
-        #     f"{before.mention} was timed out for {after.timed_out_until}. Unban in 5"
-        # )
-        # await asyncio.sleep(5)
-        # await before.edit(timed_out_until=discord.utils.utcnow() + atime)
-        # await channel.send(f"{before.mention} timeout removed")
         offender = before.id
+
         # POLL SETUP
         embed = discord.Embed(
             title="Poll",
@@ -70,6 +114,11 @@ class GuardianCog(commands.Cog):
             emoji_count = 8
         await message.add_reaction("👍")
         await message.add_reaction("👎")
+
+        async def timer(bot, duration):
+            duration = datetime.timedelta(seconds=int(duration))
+            time_remaining = datetime.datetime.utcnow() + duration
+
         await channel.send(
             f"```THE POLL WILL LAST: ⏲️ {duration/10/60} minutes  ⏲️\
                 \nREACTIONS REQUIRED: 👍 {emoji_count} 👍\
@@ -85,11 +134,10 @@ class GuardianCog(commands.Cog):
     async def timeout(
         self, message, offender: discord.Member, emoji_count, channel: discord.TextChannel
     ):
-        thumbs_up = message.reactions[0].count - 1  # first is expected to be (thumbs up)
-        thumbs_down = message.reactions[1].count - 1  # second is expected to be (thumbs down)
+        thumbs_up = message.reactions[0].count - 1
+        thumbs_down = message.reactions[1].count - 1
         member = offender
 
-        # 120 mins 48 hours 28 days,
         if thumbs_up >= emoji_count and thumbs_up > thumbs_down:
 
             adjusted_time = datetime.timedelta(seconds=int(1))
@@ -99,6 +147,20 @@ class GuardianCog(commands.Cog):
             await channel.send(
                 "**Vote Failed**: **Voting conditions not met.** _Revolution ain't so easy._ **🏳️🏳️🏳️**"
             )
+
+    @commands.command()
+    async def unban(self, ctx, user: discord.User):
+        guild = ctx.guild
+        useravatar = user.display_avatar
+        await guild.unban(user=user)
+        embed = discord.Embed(
+            title="Mod Action",
+            description=(f"Successfully unbanned ` {user.name} `"),
+            colour=discord.Colour.red(),
+        )
+        embed.set_thumbnail(url=useravatar)
+
+        await ctx.send(embed=embed)
 
 
 async def setup(bot):
