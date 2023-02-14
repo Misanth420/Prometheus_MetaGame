@@ -22,7 +22,12 @@ class GuardianCog(commands.Cog):
 
         async for entry in guild.audit_logs(action=discord.AuditLogAction.ban, limit=1):
 
-            print(f"{entry.user} banned {entry.target} | {entry.action} |  | {entry.reason}")
+            print(
+                f"{entry.user} banned {entry.target} | {entry.action} |  | {entry.reason} | {self.bot.user}"
+            )
+            if entry.user == self.bot.user:
+                print(f"Ban made by a bot {self.bot.user} , not a mod.")
+                return
             reason = entry.reason
             mod = entry.user
 
@@ -44,9 +49,9 @@ class GuardianCog(commands.Cog):
         )
         await asyncio.sleep(duration)
         message = await channel.fetch_message(message.id)
-        await self.timeout(message, user, guild, emoji_count, channel)
+        await self.unbanpollcount(message, user, guild, emoji_count, channel)
 
-    async def timeout(
+    async def unbanpollcount(
         self, message, user: discord.Member, guild, emoji_count, channel: discord.TextChannel
     ):
         thumbs_up = message.reactions[0].count - 1
