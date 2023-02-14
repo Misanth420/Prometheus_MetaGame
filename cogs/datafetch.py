@@ -20,10 +20,16 @@ class FetchDataCog(commands.Cog):
             day_ago = now - datetime.timedelta(days=1)
             week_ago = now - datetime.timedelta(days=7)
             month_ago = now - datetime.timedelta(days=30)
-            day_report = Report.select().where(Report.date >= day_ago)
-            week_report = Report.select().where(Report.date >= week_ago)
-            month_report = Report.select().where(Report.date >= month_ago)
-            total_report = Report.select().where(Report.server == ctx.guild.id)
+            day_report = report.select().where(
+                Report.date >= day_ago, Report.server == ctx.guild.id
+            )
+            week_report = report.select().where(
+                Report.date >= week_ago, Report.server == ctx.guild.id
+            )
+            month_report = report.select().where(
+                Report.date >= month_ago, Report.server == ctx.guild.id
+            )
+            total_report = report.select().where(Report.server == ctx.guild.id)
 
             art_report = Report.select().where(Report.guildbanner == "Art and Design")
             buidl_report = Report.select().where(Report.guildbanner == "Building")
@@ -45,7 +51,7 @@ class FetchDataCog(commands.Cog):
                 colour=discord.Colour.dark_purple(),
                 description=(
                     f"There are a total of ` {num_total} report(s) ` found for ` {ctx.guild.name} `.\
-            \nThat includes:\n`{num_total_art} ART reports`,\n`{num_total_buidl} BUIDL reports`,\
+            \n.\n.\nThat includes:\n`{num_total_art} ART reports`,\n`{num_total_buidl} BUIDL reports`,\
             \n`{num_total_bridgebuidl} BRIDGEBUIDL reports`,\
             \n`{num_total_innkeep} INNKEEP reports` and \n`{num_total_shill} SHILL reports.`"
                 ),
@@ -68,7 +74,6 @@ class FetchDataCog(commands.Cog):
                 value=f"There are a total of ` {num_month} report(s) ` in the past 30 days",
                 inline=False,
             )
-            embed.add_field
 
             await ctx.send(embed=embed)
         else:
@@ -78,28 +83,46 @@ class FetchDataCog(commands.Cog):
             now = datetime.datetime.utcnow()
             week_ago = now - datetime.timedelta(days=7)
             month_ago = now - datetime.timedelta(days=30)
+
             week_report = Report.select().where(
-                Report.date >= week_ago, Report.user_discord_id == user.id
+                Report.date >= week_ago,
+                Report.user_discord_id == user.id,
+                Report.server == ctx.guild.id,
+                Report.server == ctx.guild.id,
             )
             month_report = Report.select().where(
-                Report.date >= month_ago, Report.user_discord_id == user.id
+                Report.date >= month_ago,
+                Report.user_discord_id == user.id,
+                Report.server == ctx.guild.id,
             )
-            total_report = Report.select().where(Report.user_discord_id == user.id)
+            total_report = Report.select().where(
+                Report.user_discord_id == user.id, Report.server == ctx.guild.id
+            )
 
             art_report = Report.select().where(
-                Report.guildbanner == "Art and Design", Report.user_discord_id == user.id
+                Report.guildbanner == "Art and Design",
+                Report.user_discord_id == user.id,
+                Report.server == ctx.guild.id,
             )
             buidl_report = Report.select().where(
-                Report.guildbanner == "Building", Report.user_discord_id == user.id
+                Report.guildbanner == "Building",
+                Report.user_discord_id == user.id,
+                Report.server == ctx.guild.id,
             )
             bridgebuidl_report = Report.select().where(
-                Report.guildbanner == "BridgeBuilding", Report.user_discord_id == user.id
+                Report.guildbanner == "BridgeBuilding",
+                Report.user_discord_id == user.id,
+                Report.server == ctx.guild.id,
             )
             innkeep_report = Report.select().where(
-                Report.guildbanner == "Innkeeping", Report.user_discord_id == user.id
+                Report.guildbanner == "Innkeeping",
+                Report.user_discord_id == user.id,
+                Report.server == ctx.guild.id,
             )
             shill_report = Report.select().where(
-                Report.guildbanner == "Shilling and Rainmaking", Report.user_discord_id == user.id
+                Report.guildbanner == "Shilling and Rainmaking",
+                Report.user_discord_id == user.id,
+                Report.server == ctx.guild.id,
             )
 
             num_week = week_report.count()
@@ -114,8 +137,8 @@ class FetchDataCog(commands.Cog):
             embed = discord.Embed(
                 colour=discord.Colour.from_rgb(0, 255, 255),
                 description=(
-                    f"There are a total of ` {num_total} report(s) ` found for ` {user.name} `.\n.\
-            \nThat includes:\n`{num_total_art} ART reports`,\n`{num_total_buidl} BUIDL reports`,\
+                    f"There are a total of ` {num_total} report(s) ` found for ` {user.name} `.\
+            \n.\n.\nThat includes:\n`{num_total_art} ART reports`,\n`{num_total_buidl} BUIDL reports`,\
             \n`{num_total_bridgebuidl} BRIDGEBUIDL reports`,\
             \n`{num_total_innkeep} INNKEEP reports` and \n`{num_total_shill} SHILL reports.`"
                 ),

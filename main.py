@@ -58,6 +58,7 @@ def run():
             intents.message_content = True
             intents.members = True
             intents.guilds = True
+            intents.presences = True
             super().__init__(command_prefix=fetch_prefix, intents=intents)
 
         async def setup_hook(self) -> None:

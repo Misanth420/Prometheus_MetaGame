@@ -7,9 +7,14 @@ class PurgeCog(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=["purge", "delete"])
-    async def clear(self, ctx, amount: int):
+    async def clear(self, ctx, amount: int | str):
         if not ctx.message.author.guild_permissions.manage_messages:
             await ctx.send("Sorry, ask someone else, preferably a moderator")
+            return
+
+        limit = 99
+        if amount == "all":
+            await ctx.channel.purge(limit=limit)
             return
 
         amount = amount + 1

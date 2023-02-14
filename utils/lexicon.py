@@ -1,0 +1,60 @@
+import random
+
+titles = [
+    "The Code Wizard",
+    "The Circuit Sage",
+    "The Silicon Sorcerer",
+    "The Data Daredevil",
+    "The Byte Boss",
+    "The Pixel Pioneer",
+    "The Gadget Guru",
+    "The Keyboard King",
+    "The Screen Savant",
+    "The Joystick Jedi",
+    "The Wifi Whisperer",
+    "The Gadget Guru",
+    "The Byte Biter",
+    "The Digital Dynamo",
+    "The Circuit Crusader",
+    "The Digital Duke",
+    "The Byte Baron",
+    "The Keyboard Knight",
+    "The Screen Squire",
+    "The Program Prince",
+    "The Algorithm Archer",
+    "Bane of Sugar Plums",
+    "The Gadget Gaoler",
+    "The Data Dragon",
+    "The Pixel Paladin",
+    "The Unbelievable Unicorn",
+    "The Lost Adventurer",
+    "The Baffling Battler",
+    "The Confounding Crusader",
+    "The Daring Dingleberry",
+    "The Eccentric Enchanter",
+    "The Flabbergasting Fighterjet",
+    "The Grandiose Squire",
+    "The Haphazard Hero",
+]
+descriptions = [
+    "Amidst the clash of swords and shields, a scorched parchment caught the eye, fastened upon a spear and yearning to be rent...Its script proclaimed:",
+    "Upon the war-torn field, a curious document of singed hue, fixed upon a spear's tip, cried out to be unrolled...It read thus:",
+    "Within the scorched earth of the battlefield, a strange script was spied, impaled upon a spear and thirsting for release...Its words declared:",
+    "Amid the heat of battle, a mysterious scorched scroll, ensnared upon a spearhead, beckoned to be unraveled...Its text revealed:",
+    "In the midst of war's chaos, a forlorn parchment, scorched and tacked to a spear, called out to be torn asunder...Its letters spelled:",
+    "Upon the battlefield, a witness to war's brutal blaze, a scorched script was seen, impaled on a lance and eager to be deciphered...Its verse whispered:",
+    "In the heat of combat, a singed missive caught the gaze, affixed to a spear's shaft and pleading to be opened...Its lines sang:",
+    "Amidst the war drums' beat, a scorched record stood in wait, pinned to a spear's head and imploring to be torn...Its script shouted:",
+    "Within the realm of war's harsh fire, a curious parchment did aspire, fastened on a lance's tip and clamoring to be read...Its tale cried:",
+    "On the field of battle's strife, a seared scroll, with windswept life, upon a spear's point, summoned to be shattered...Its tale proclaimed:",
+    "Amidst the chaos of war, a mysterious, singed parchment was spied, impaled upon a lance, yearning to be shredded...The inscription declared:",
+    "Amid the clash of battle, an enigmatic, seared scroll was espied, affixed to a spear, imploring to be rent...The script proclaimed:",
+    "In the midst of the fray, an unusual, scorched charter was perceived, nailed to a pike, craving to be torn...The text announced:",
+    "Amid the turmoil of combat, a singular, burned missive was beheld, thrust upon a halberd, pleading to be tattered...The writing revealed:",
+    "In the heat of the fight, a strange, blackened writ was witnessed, pinned to a glaive, demanding to be shattered...The lines declared:",
+]
+
+
+# random_title = random.choice(titles)
+# random_desc = random.choice(descriptions)
+# print(random_title)
